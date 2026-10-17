@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient';
-import { Compound, ResaleProperty, ResaleFilterParams, SellerSubmission } from '@/types/database';
+import { Compound, ResaleProperty, ResaleFilterParams, SellerSubmission, LeadPriority } from '@/types/database';
 import { MOCK_COMPOUNDS, MOCK_PROPERTIES, MOCK_SUBMISSIONS } from './mockData';
 import { cleanSecondaryImagesForSoldProperty } from './imageUpload';
 
@@ -189,44 +189,63 @@ export async function getPropertyById(idOrRef: string): Promise<ResaleProperty |
 }
 
 /**
- * Submit seller unit (Public Form)
+ * Submit seller unit (Public Form) - Connects directly to Supabase CRM
  */
 export async function submitSellerUnit(
   submission: Omit<SellerSubmission, 'id' | 'status' | 'created_at'>
 ): Promise<{ success: boolean; id?: string; error?: string }> {
+  const paid = Number(submission.paid_amount || 0);
+  const over = Number(submission.over_price || 0);
+  const overRatio = paid > 0 ? (over / paid) * 100 : 0;
+  const autoPriority: LeadPriority = overRatio <= 15 ? 'hot' : overRatio <= 30 ? 'warm' : 'cold';
+
+  const generatedId = `REQ-${Date.now().toString().slice(-6)}`;
   const newSubmission: SellerSubmission = {
     ...submission,
-    id: `sub-${Date.now()}`,
+    id: generatedId,
     status: 'new',
+    priority: autoPriority,
     created_at: new Date().toISOString(),
   };
 
+  localSubmissions.unshift(newSubmission);
+
   if (!isSupabaseConfigured) {
-    localSubmissions.unshift(newSubmission);
     return { success: true, id: newSubmission.id };
   }
 
   try {
-    const { data, error } = await supabase
+    const payload = {
+      owner_name: submission.owner_name,
+      owner_phone: submission.owner_phone,
+      compound_name: submission.compound_name,
+      property_type: submission.property_type || 'شقة',
+      area_sqm: Number(submission.area_sqm || 0),
+      paid_amount: paid,
+      over_price: over,
+      remaining_amount: Number(submission.remaining_amount || 0),
+      notes: submission.notes || '',
+      status: 'new',
+    };
+
+    // Anonymous insert without .select() to adhere strictly to Supabase RLS public insert policy
+    const { error } = await supabase
       .from('seller_submissions')
-      .insert([submission])
-      .select('id')
-      .single();
+      .insert([payload]);
 
     if (error) {
-      localSubmissions.unshift(newSubmission);
-      return { success: true, id: newSubmission.id };
+      console.warn('Supabase submission insert fallback:', error.message);
     }
 
-    return { success: true, id: data?.id };
-  } catch {
-    localSubmissions.unshift(newSubmission);
-    return { success: true, id: newSubmission.id };
+    return { success: true, id: generatedId };
+  } catch (err: unknown) {
+    console.warn('Supabase submission network error:', err);
+    return { success: true, id: generatedId };
   }
 }
 
 /**
- * Admin: Get all seller submissions
+ * Admin: Get all seller submissions / CRM Leads
  */
 export async function getSellerSubmissions(): Promise<SellerSubmission[]> {
   if (!isSupabaseConfigured) {
@@ -239,24 +258,73 @@ export async function getSellerSubmissions(): Promise<SellerSubmission[]> {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error || !data) {
+    if (error || !data || data.length === 0) {
       return localSubmissions;
     }
-    return data as SellerSubmission[];
+
+    // Merge Supabase data with any local mock fields if missing
+    return (data as unknown as SellerSubmission[]).map((item) => ({
+      ...item,
+      priority: item.priority || (item.over_price && item.paid_amount && (item.over_price / item.paid_amount) <= 0.15 ? 'hot' : 'warm'),
+      internal_notes: item.internal_notes || '',
+      assigned_agent: item.assigned_agent || '',
+    }));
   } catch {
     return localSubmissions;
   }
 }
 
 /**
- * Admin: Update submission status
+ * Admin: Update submission status & CRM details
  */
-export async function updateSubmissionStatus(id: string, status: SellerSubmission['status']): Promise<boolean> {
+export async function updateSubmission(
+  id: string, 
+  updates: Partial<SellerSubmission>
+): Promise<boolean> {
   const item = localSubmissions.find(s => s.id === id);
-  if (item) item.status = status;
+  if (item) {
+    Object.assign(item, updates, { updated_at: new Date().toISOString() });
+  }
 
   if (isSupabaseConfigured) {
-    await supabase.from('seller_submissions').update({ status }).eq('id', id);
+    try {
+      const dbUpdates: Record<string, unknown> = {};
+      if (updates.status) dbUpdates.status = updates.status;
+      if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+      
+      await supabase.from('seller_submissions').update(dbUpdates).eq('id', id);
+    } catch (err) {
+      console.warn('Supabase submission update error:', err);
+    }
+  }
+  return true;
+}
+
+/**
+ * Backward compatibility helper
+ */
+export async function updateSubmissionStatus(
+  id: string, 
+  status: SellerSubmission['status']
+): Promise<boolean> {
+  return updateSubmission(id, { status });
+}
+
+/**
+ * Admin: Delete a submission from CRM
+ */
+export async function deleteSubmission(id: string): Promise<boolean> {
+  const idx = localSubmissions.findIndex(s => s.id === id);
+  if (idx !== -1) {
+    localSubmissions.splice(idx, 1);
+  }
+
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('seller_submissions').delete().eq('id', id);
+    } catch (err) {
+      console.warn('Supabase submission delete error:', err);
+    }
   }
   return true;
 }

@@ -25,7 +25,15 @@ export type DeliveryStatus =
 
 export type PropertyStatus = 'available' | 'sold' | 'pending';
 
-export type SubmissionStatus = 'new' | 'contacted' | 'listed' | 'rejected';
+export type SubmissionStatus = 
+  | 'new' 
+  | 'contacted' 
+  | 'meeting' 
+  | 'negotiation' 
+  | 'listed' 
+  | 'rejected';
+
+export type LeadPriority = 'hot' | 'warm' | 'cold';
 
 export interface Compound {
   id: string;
@@ -85,7 +93,12 @@ export interface SellerSubmission {
   remaining_amount: number;
   notes?: string;
   status: SubmissionStatus;
+  priority?: LeadPriority;
+  internal_notes?: string;
+  assigned_agent?: string;
+  follow_up_date?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface ResaleFilterParams {

@@ -52,7 +52,7 @@ create table if not exists public.resale_properties (
     created_at timestamptz default now()
 );
 
--- 4. SELLER SUBMISSIONS TABLE
+-- 4. SELLER SUBMISSIONS & CRM LEADS TABLE
 create table if not exists public.seller_submissions (
     id uuid primary key default gen_random_uuid(),
     owner_name text not null,
@@ -64,9 +64,19 @@ create table if not exists public.seller_submissions (
     over_price numeric not null default 0,
     remaining_amount numeric default 0,
     notes text,
-    status text not null default 'new', -- 'new', 'contacted', 'listed', 'rejected'
-    created_at timestamptz default now()
+    status text not null default 'new', -- 'new', 'contacted', 'meeting', 'negotiation', 'listed', 'rejected'
+    priority text not null default 'warm', -- 'hot', 'warm', 'cold'
+    internal_notes text,
+    assigned_agent text,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now()
 );
+
+-- Add CRM columns to existing database if needed:
+alter table public.seller_submissions add column if not exists priority text default 'warm';
+alter table public.seller_submissions add column if not exists internal_notes text;
+alter table public.seller_submissions add column if not exists assigned_agent text;
+alter table public.seller_submissions add column if not exists updated_at timestamptz default now();
 
 -- ------------------------------------------------------------------------------
 -- ROW LEVEL SECURITY (RLS) POLICIES
@@ -106,6 +116,18 @@ with check (true);
 create policy "Allow public insert on seller_submissions"
 on public.seller_submissions for insert
 to public
+with check (true);
+
+-- Seller Submissions: Allow select & update for CRM dashboard
+create policy "Allow read on seller_submissions"
+on public.seller_submissions for select
+to public
+using (true);
+
+create policy "Allow update on seller_submissions"
+on public.seller_submissions for update
+to public
+using (true)
 with check (true);
 
 -- Seller Submissions: Authenticated admin can view and update
