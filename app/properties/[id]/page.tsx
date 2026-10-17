@@ -22,14 +22,18 @@ import {
   CheckCircle2, 
   Clock, 
   Paintbrush, 
-  Share2, 
   MessageCircle, 
   PhoneCall, 
   ShieldCheck, 
-  ArrowRight,
+  Calendar,
   Sparkles,
-  Building2,
-  Calendar
+  TreePine,
+  Shield,
+  Coffee,
+  Car,
+  Eye,
+  FileCheck2,
+  Check
 } from 'lucide-react';
 
 interface PropertyPageProps {
@@ -51,11 +55,15 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
     .filter((p) => p.id !== property.id && p.compound?.area_name === property.compound?.area_name)
     .slice(0, 3);
 
-  const whatsappUrl = generateWhatsAppLink(
+  const whatsappInquiryUrl = generateWhatsAppLink(
     property.reference_code,
     property.title_ar,
     property.id
   );
+
+  const whatsappInspectionUrl = `https://wa.me/201000000000?text=${encodeURIComponent(
+    `السلام عليكم، أرغب في تحديد موعد لمعاينة وحدة الريسيل كود (${property.reference_code}) في كمبوند ${property.compound?.name_ar}.`
+  )}`;
 
   const isSold = property.status === 'sold';
 
@@ -76,15 +84,15 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="bg-slate-200/80 text-slate-700 px-2.5 py-1 rounded-lg font-mono font-bold">
+            <span className="bg-slate-900 text-amber-400 px-3 py-1.5 rounded-xl font-mono font-bold text-xs shadow-sm">
               كود الوحدة: {property.reference_code}
             </span>
             {isSold ? (
-              <span className="bg-rose-100 text-rose-700 font-bold px-2.5 py-1 rounded-lg">
+              <span className="bg-rose-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm">
                 تم البيع
               </span>
             ) : (
-              <span className="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
+              <span className="bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 متاحة للشراء الفوري
               </span>
@@ -110,7 +118,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
             </span>
             <span>•</span>
             <span className="text-slate-500">
-              المطور: <strong className="text-slate-800">{property.compound?.developer_name}</strong>
+              المطور العقاري: <strong className="text-slate-900 font-bold">{property.compound?.developer_name}</strong>
             </span>
           </div>
         </div>
@@ -121,86 +129,90 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
           {/* Main Column (8 Cols) */}
           <div className="lg:col-span-8 space-y-8">
             
-            {/* Image Gallery */}
+            {/* Image Gallery with Lightbox */}
             <ImageGallery images={property.images} title={property.title_ar} />
 
-            {/* Core Specs Quick Grid */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-base font-black text-slate-900 border-r-2 border-amber-500 pr-2">
-                المواصفات الرئيسية للوحدة
-              </h3>
+            {/* Core Specs Grid */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  المواصفات الفنية للوحدة
+                </h3>
+                <span className="text-xs text-slate-500 font-medium">بيانات موثقة بعقد المطور</span>
+              </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
                     <Maximize2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-[11px] text-slate-500 font-medium">المساحة الإجمالية</div>
-                    <div className="text-sm font-bold text-slate-900">{property.area_sqm} م²</div>
+                    <div className="text-[11px] text-slate-500 font-medium">المساحة المبنية</div>
+                    <div className="text-sm font-black text-slate-900">{property.area_sqm} م²</div>
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
                     <Bed className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="text-[11px] text-slate-500 font-medium">غرف النوم</div>
-                    <div className="text-sm font-bold text-slate-900">{property.bedrooms} غرف</div>
+                    <div className="text-sm font-black text-slate-900">{property.bedrooms} غرف</div>
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
                     <Bath className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="text-[11px] text-slate-500 font-medium">الحمامات</div>
-                    <div className="text-sm font-bold text-slate-900">{property.bathrooms} حمام</div>
+                    <div className="text-sm font-black text-slate-900">{property.bathrooms} حمام</div>
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
                     <Layers className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="text-[11px] text-slate-500 font-medium">رقم الدور</div>
-                    <div className="text-sm font-bold text-slate-900">
+                    <div className="text-sm font-black text-slate-900">
                       {property.floor_number === 1 ? 'أرضي / جاردن' : `الدور ${property.floor_number}`}
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
                     <Paintbrush className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="text-[11px] text-slate-500 font-medium">حالة التشطيب</div>
-                    <div className="text-sm font-bold text-slate-900">{property.finishing_type}</div>
+                    <div className="text-sm font-black text-slate-900">{property.finishing_type}</div>
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
                     <Clock className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="text-[11px] text-slate-500 font-medium">موعد الاستلام</div>
-                    <div className="text-sm font-bold text-slate-900">{property.delivery_status}</div>
+                    <div className="text-sm font-black text-slate-900">{property.delivery_status}</div>
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3 sm:col-span-2">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3 sm:col-span-2">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="text-[11px] text-slate-500 font-medium">تاريخ الاستلام التعاقدي</div>
-                    <div className="text-sm font-bold text-slate-900">
+                    <div className="text-sm font-black text-slate-900">
                       {property.delivery_date || 'موضح بعقد المطور'}
                     </div>
                   </div>
@@ -209,23 +221,58 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
               </div>
             </div>
 
-            {/* Financial Breakdown Box (CRITICAL COMPONENT) */}
+            {/* Financial Breakdown Box (The Core USP) */}
             <FinancialBreakdown property={property} />
 
+            {/* Compound Amenities & Features */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-4">
+              <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                <Building className="w-4 h-4 text-amber-500" />
+                مميزات وخدمات كمبوند {property.compound?.name_ar}
+              </h3>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2 text-slate-700 font-semibold">
+                  <TreePine className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>مساحات خضراء ولاندسكيب</span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2 text-slate-700 font-semibold">
+                  <Shield className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>أمن وحراسة 24 ساعة وكاميرات</span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2 text-slate-700 font-semibold">
+                  <Coffee className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>كلوب هاوس ومطاعم وكافيهات</span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2 text-slate-700 font-semibold">
+                  <Car className="w-4 h-4 text-sky-600 shrink-0" />
+                  <span>مواقف وجراجات سيارات مخصصة</span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2 text-slate-700 font-semibold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>صيانة دورية وإدارة للمشروع</span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2 text-slate-700 font-semibold">
+                  <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>موقع استراتيجي بالقرب من الخدمات</span>
+                </div>
+              </div>
+            </div>
+
             {/* Arabic Description */}
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-lg font-black text-slate-900 border-r-2 border-amber-500 pr-2">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-4">
+              <h3 className="text-lg font-black text-slate-900 border-r-3 border-amber-500 pr-2.5">
                 تفاصيل ووصف الوحدة
               </h3>
-              <div className="text-sm sm:text-base text-slate-700 leading-relaxed whitespace-pre-line">
+              <div className="text-sm sm:text-base text-slate-700 leading-relaxed whitespace-pre-line font-medium">
                 {property.description_ar}
               </div>
 
-              {/* Developer & Security Verification Notice */}
+              {/* Developer & Legal Verification Notice */}
               <div className="pt-4 border-t border-slate-100 flex items-center gap-3 text-xs text-slate-500">
                 <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
                 <span>
-                  الوحدة معروضة ببيانات معتمدة ويتم إتمام التنازل وتغيير الشيكات داخل مقر شركة <strong>{property.compound?.developer_name}</strong> بحضور المشتري والبائع ومستشارنا القانوني.
+                  الوحدة معروضة ببيانات معتمدة ويتم إتمام التنازل وتغيير الشيكات رسمياً داخل مقر شركة <strong>{property.compound?.developer_name}</strong> بحضور المشتري والبائع ومستشارنا القانوني.
                 </span>
               </div>
             </div>
@@ -235,19 +282,19 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
           {/* Sticky Sidebar on Desktop (4 Cols) */}
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
             
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-xl space-y-6">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-2xl space-y-6">
               
               <div className="space-y-3">
-                <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
+                <span className="text-xs font-black text-slate-400 block uppercase tracking-wider">
                   ملخص تسعير الريسيل
                 </span>
 
                 {/* Cash Down Highlight */}
                 <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-200/80">
-                  <div className="text-xs font-bold text-emerald-800">
+                  <div className="text-xs font-black text-emerald-800">
                     المطلوب كاش الآن (المقدم + الأوفر):
                   </div>
-                  <div className="text-2xl sm:text-3xl font-black text-emerald-950 mt-1">
+                  <div className="text-2xl sm:text-3xl font-black text-emerald-950 mt-1 font-mono">
                     {formatEGP(property.total_down_payment)}
                   </div>
                 </div>
@@ -256,11 +303,11 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                 <div className="space-y-2 pt-1 text-xs">
                   <div className="flex items-center justify-between text-slate-600">
                     <span>المتبقي أقساط للمطور:</span>
-                    <span className="font-bold text-slate-900">{formatEGP(property.remaining_installments)}</span>
+                    <span className="font-bold text-slate-900 font-mono">{formatEGP(property.remaining_installments)}</span>
                   </div>
                   <div className="flex items-center justify-between text-slate-600">
-                    <span>السعر الإجمالي:</span>
-                    <span className="font-black text-slate-900 text-sm">{formatEGP(property.total_price)}</span>
+                    <span>السعر الإجمالي النهائي:</span>
+                    <span className="font-black text-slate-900 text-sm font-mono">{formatEGP(property.total_price)}</span>
                   </div>
                 </div>
               </div>
@@ -268,13 +315,23 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
               {/* Action Buttons */}
               <div className="space-y-3 pt-2">
                 <a
-                  href={whatsappUrl}
+                  href={whatsappInquiryUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 transition-all hover:scale-102 active:scale-98"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 transition-all hover:scale-102 active:scale-98"
                 >
                   <MessageCircle className="w-5 h-5 fill-white text-emerald-600" />
                   <span>تواصل واتساب بخصوص الوحدة</span>
+                </a>
+
+                <a
+                  href={whatsappInspectionUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all hover:scale-102 active:scale-98"
+                >
+                  <Eye className="w-4 h-4 text-slate-950" />
+                  <span>طلب تحديد موعد معاينة على الطبيعة</span>
                 </a>
 
                 <a
@@ -323,7 +380,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
         <div className="flex flex-col">
           <span className="text-[10px] text-emerald-800 font-bold">المطلوب كاش:</span>
-          <span className="text-base font-black text-slate-950">
+          <span className="text-base font-black text-slate-950 font-mono">
             {formatEGP(property.total_down_payment)}
           </span>
         </div>
@@ -338,7 +395,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
           </a>
 
           <a
-            href={whatsappUrl}
+            href={whatsappInquiryUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-emerald-600 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center gap-1.5 shadow-md active:scale-95 transition-transform"
