@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&amp;display=swap');
+      .bg-dark { fill: #202426; }
+      .stroke-light { stroke: #EDEAE4; fill: none; stroke-width: 9.5; stroke-linecap: round; stroke-linejoin: round; }
+      .accent-fill { fill: #B8522E; }
+      .accent-stroke { stroke: #B8522E; fill: none; stroke-width: 10.5; stroke-linecap: round; }
+      .sub-accent { fill: #B8522E; font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; font-size: 21px; font-weight: 500; letter-spacing: 11px; }
+      .net-line { stroke: #B8522E; stroke-width: 1.2; stroke-opacity: 0.35; fill: none; }
+      .net-node { fill: #B8522E; fill-opacity: 0.65; }
+    </style>
+  </defs>
+
+  <!-- Dark Charcoal Background -->
+  <rect width="800" height="320" rx="16" class="bg-dark"/>
+
+  <!-- Subtle Geometric Logistics Network Mesh (Right & Left Corners) -->
+  <g>
+    <line x1="650" y1="20" x2="720" y2="65" class="net-line"/>
+    <line x1="720" y1="65" x2="775" y2="35" class="net-line"/>
+    <line x1="720" y1="65" x2="750" y2="130" class="net-line"/>
+    <line x1="650" y1="20" x2="680" y2="105" class="net-line"/>
+    <line x1="680" y1="105" x2="750" y2="130" class="net-line"/>
+    <line x1="720" y1="65" x2="680" y2="105" class="net-line"/>
+    <circle cx="650" cy="20" r="3" class="net-node"/>
+    <circle cx="720" cy="65" r="4" class="net-node"/>
+    <circle cx="775" cy="35" r="3" class="net-node"/>
+    <circle cx="750" cy="130" r="3.5" class="net-node"/>
+    <circle cx="680" cy="105" r="3" class="net-node"/>
+
+    <line x1="25" y1="220" x2="85" y2="255" class="net-line"/>
+    <line x1="85" y1="255" x2="55" y2="300" class="net-line"/>
+    <line x1="85" y1="255" x2="145" y2="285" class="net-line"/>
+    <line x1="25" y1="220" x2="55" y2="300" class="net-line"/>
+    <circle cx="25" cy="220" r="3" class="net-node"/>
+    <circle cx="85" cy="255" r="4" class="net-node"/>
+    <circle cx="55" cy="300" r="3" class="net-node"/>
+    <circle cx="145" cy="285" r="3" class="net-node"/>
+  </g>
+
+  <!-- Pure Vector Wordmark: SALiNO -->
+  <g transform="translate(142, 85)">
+    <!-- S -->
+    <path d="M 68,18 C 62,6 48,2 34,2 C 15,2 4,11 4,24 C 4,38 18,43 36,47 C 56,51 70,57 70,73 C 70,89 55,98 35,98 C 17,98 4,90 0,77" class="stroke-light"/>
+    
+    <!-- A -->
+    <path d="M 98,97 L 136,4 L 174,97" class="stroke-light"/>
+    <line x1="111" y1="68" x2="161" y2="68" class="stroke-light"/>
+
+    <!-- L -->
+    <polyline points="206,4 206,96 264,96" class="stroke-light"/>
+
+    <!-- i (Distinctive Burnt Orange Stem + Dot) -->
+    <line x1="298" y1="28" x2="298" y2="96" class="accent-stroke"/>
+    <circle cx="298" cy="7" r="6.5" class="accent-fill"/>
+
+    <!-- N -->
+    <polyline points="334,96 334,5 402,95 402,4" class="stroke-light"/>
+
+    <!-- O -->
+    <circle cx="472" cy="50" r="46" class="stroke-light"/>
+  </g>
+
+  <!-- Subtitle: PROJECT MANAGEMENT -->
+  <text x="405" y="238" text-anchor="middle" class="sub-accent">PROJECT MANAGEMENT</text>
+</svg>

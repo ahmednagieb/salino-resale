@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
-import { Building2, Lock, Mail, KeyRound } from 'lucide-react';
+import Logo from '@/components/Logo';
+import { Lock, Mail, KeyRound } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -62,10 +63,10 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Brand */}
-        <div className="text-center space-y-2 pt-2">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-slate-950 font-bold mx-auto shadow-lg shadow-amber-500/20">
-            <Building2 className="w-7 h-7 text-slate-950" />
-          </div>
+        <div className="text-center space-y-3 pt-2">
+          <Link href="/" className="inline-block group">
+            <Logo className="h-16 w-auto mx-auto rounded-2xl shadow-xl border border-white/10 group-hover:border-amber-500/40 transition-all" />
+          </Link>
           <h2 className="text-2xl font-black text-white">
             {t('admin.login.title')}
           </h2>

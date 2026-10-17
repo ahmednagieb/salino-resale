@@ -28,6 +28,11 @@ export const metadata: Metadata = {
     'New Cairo Resale',
     'Sheikh Zayed Resale',
   ],
+  icons: {
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
+  },
 };
 
 export default function RootLayout({

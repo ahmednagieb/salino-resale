@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Logo from '@/components/Logo';
 import { 
   Building2, 
   Home, 
@@ -33,12 +34,11 @@ export default function AdminNav() {
           
           {/* Logo & Badge */}
           <div className="flex items-center gap-3 sm:gap-4">
-            <Link href="/admin" className="flex items-center gap-2 font-black text-lg text-white">
-              <span className="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-sm">
-                S
+            <Link href="/admin" className="flex items-center gap-2.5 group">
+              <Logo className="h-9 sm:h-10 w-auto rounded-lg shadow-md border border-white/10 group-hover:border-amber-500/40 transition-all" />
+              <span className="text-[11px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                Admin
               </span>
-              <span className="hidden sm:inline">{t('admin.nav.brand')}</span>
-              <span className="sm:hidden">Salino Admin</span>
             </Link>
 
             {/* Supabase Status Pill */}

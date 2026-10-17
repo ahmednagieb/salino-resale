@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { Building2, MessageCircle, ShieldCheck, Clock } from 'lucide-react';
+import Logo from '@/components/Logo';
+import { MessageCircle, ShieldCheck, Clock } from 'lucide-react';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -21,14 +22,9 @@ export default function Footer() {
           
           {/* Brand info */}
           <div className="space-y-4 md:col-span-1">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-slate-950 font-bold">
-                <Building2 className="w-5 h-5 text-slate-950" />
-              </div>
-              <span className="text-xl font-black text-white">
-                {t('nav.brand')} <span className="text-amber-400">{t('nav.resale')}</span>
-              </span>
-            </div>
+            <Link href="/" className="inline-block group">
+              <Logo className="h-14 sm:h-16 w-auto rounded-xl shadow-xl border border-white/10 group-hover:border-amber-500/40 transition-all" />
+            </Link>
             <p className="text-sm text-slate-400 leading-relaxed">
               {t('footer.desc')}
             </p>

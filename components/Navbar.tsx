@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import Logo from '@/components/Logo';
 import { 
-  Building2, 
   PlusCircle, 
   Menu, 
   X, 
@@ -33,19 +33,9 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
-          {/* Logo & Platform Tagline */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-amber-500/25 group-hover:scale-105 transition-transform">
-              <Building2 className="w-6 h-6 text-slate-950" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-1.5">
-                {t('nav.brand')} <span className="text-amber-400 font-black text-xs sm:text-sm px-2 py-0.5 rounded-lg bg-amber-400/15 border border-amber-400/30">{t('nav.resale')}</span>
-              </span>
-              <span className="text-[11px] text-slate-400 font-medium">
-                {t('nav.brandSubtitle')}
-              </span>
-            </div>
+          {/* Logo */}
+          <Link href="/" className="flex items-center group transition-transform">
+            <Logo className="h-11 sm:h-12 w-auto rounded-xl shadow-lg border border-white/10 group-hover:border-amber-500/40 group-hover:scale-105 transition-all" />
           </Link>
 
           {/* Desktop Nav Links */}
