@@ -2,20 +2,18 @@
 
 import { useState } from 'react';
 import { ResaleProperty } from '@/types/database';
-import { formatEGP } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 import { 
   Calculator, 
   Coins, 
   Calendar, 
-  AlertCircle,
   FileCheck2,
   CheckCircle,
   Receipt,
   Copy,
   Check,
   ShieldCheck,
-  TrendingUp,
-  Percent
+  TrendingUp
 } from 'lucide-react';
 
 interface FinancialBreakdownProps {
@@ -24,6 +22,7 @@ interface FinancialBreakdownProps {
 
 export default function FinancialBreakdown({ property }: FinancialBreakdownProps) {
   const [copied, setCopied] = useState(false);
+  const { lang, t, formatMoney } = useLanguage();
 
   const total = property.total_price || (property.total_down_payment + property.remaining_installments) || 1;
   const paidPercent = Math.round((property.paid_amount / total) * 100);
@@ -36,12 +35,23 @@ export default function FinancialBreakdown({ property }: FinancialBreakdownProps
     : 0;
 
   const handleCopySummary = () => {
-    const text = `ملخص الحسبة المالية لوحدة ريسيل (${property.reference_code}) في ${property.compound?.name_ar}:
-- المطلوب كاش الآن (مقدم + أوفر): ${formatEGP(property.total_down_payment)}
-- المتبقي أقساط للمطور: ${formatEGP(property.remaining_installments)} على ${property.installment_years_left} سنوات
-- السعر الإجمالي: ${formatEGP(property.total_price)}
-- وديعة الصيانة: ${formatEGP(property.maintenance_fee)}
-- رسوم التنازل: ${formatEGP(property.transfer_fee)}`;
+    const compoundName = lang === 'en' && property.compound?.name_en
+      ? property.compound.name_en
+      : property.compound?.name_ar;
+
+    const text = lang === 'en'
+      ? `Financial Resale Summary (${property.reference_code}) in ${compoundName}:
+- Cash Down Payment Required Now (Paid + Over): ${formatMoney(property.total_down_payment)}
+- Remaining Installments to Developer: ${formatMoney(property.remaining_installments)} over ${property.installment_years_left} years
+- Total Property Price: ${formatMoney(property.total_price)}
+- Maintenance Deposit: ${formatMoney(property.maintenance_fee)}
+- Developer Transfer Fee: ${formatMoney(property.transfer_fee)}`
+      : `ملخص الحسبة المالية لوحدة ريسيل (${property.reference_code}) في ${compoundName}:
+- المطلوب كاش الآن (مقدم + أوفر): ${formatMoney(property.total_down_payment)}
+- المتبقي أقساط للمطور: ${formatMoney(property.remaining_installments)} على ${property.installment_years_left} سنوات
+- السعر الإجمالي: ${formatMoney(property.total_price)}
+- وديعة الصيانة: ${formatMoney(property.maintenance_fee)}
+- رسوم التنازل: ${formatMoney(property.transfer_fee)}`;
 
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -54,15 +64,15 @@ export default function FinancialBreakdown({ property }: FinancialBreakdownProps
       {/* Header with Title & Copy Summary Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 shadow-sm">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 shadow-sm shrink-0">
             <Calculator className="w-6 h-6" />
           </div>
           <div>
             <h3 className="text-xl sm:text-2xl font-black text-slate-900">
-              تفاصيل السداد والبيانات المالية للريسيل
+              {t('fin.title')}
             </h3>
             <p className="text-xs text-slate-500 font-medium">
-              حسابات دقيقة ومفصلة للمطلوب كاش، الأوفر برايس، ومتبقي شيكات المطور
+              {t('fin.subtitle')}
             </p>
           </div>
         </div>
@@ -76,12 +86,12 @@ export default function FinancialBreakdown({ property }: FinancialBreakdownProps
             {copied ? (
               <>
                 <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="text-emerald-700">تم نسخ الحسبة!</span>
+                <span className="text-emerald-700">{t('fin.copied')}</span>
               </>
             ) : (
               <>
                 <Copy className="w-3.5 h-3.5 text-slate-500" />
-                <span>نسخ ملخص الحسبة</span>
+                <span>{t('fin.copySummary')}</span>
               </>
             )}
           </button>
@@ -97,9 +107,11 @@ export default function FinancialBreakdown({ property }: FinancialBreakdownProps
         <div className="flex items-center justify-between text-xs font-bold text-slate-700">
           <span className="flex items-center gap-1.5">
             <TrendingUp className="w-4 h-4 text-amber-500" />
-            توزيع القيمة المالية للوحدة:
+            {t('fin.distribution')}
           </span>
-          <span className="text-slate-500 font-normal">إجمالي السعر: {formatEGP(property.total_price)}</span>
+          <span className="text-slate-500 font-normal">
+            {t('fin.totalPrice')} {formatMoney(property.total_price)}
+          </span>
         </div>
 
         {/* Stacked Bar */}
@@ -107,17 +119,17 @@ export default function FinancialBreakdown({ property }: FinancialBreakdownProps
           <div 
             style={{ width: `${paidPercent}%` }} 
             className="h-full bg-emerald-600 transition-all duration-500" 
-            title={`المدفوع للشركة: ${paidPercent}%`}
+            title={`${paidPercent}%`}
           />
           <div 
             style={{ width: `${overPercent}%` }} 
             className="h-full bg-amber-500 transition-all duration-500" 
-            title={`الأوفر برايس: ${overPercent}%`}
+            title={`${overPercent}%`}
           />
           <div 
             style={{ width: `${remainingPercent}%` }} 
             className="h-full bg-sky-500 transition-all duration-500" 
-            title={`المتبقي أقساط: ${remainingPercent}%`}
+            title={`${remainingPercent}%`}
           />
         </div>
 
@@ -125,15 +137,21 @@ export default function FinancialBreakdown({ property }: FinancialBreakdownProps
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-emerald-600 shrink-0" />
-            <span className="text-slate-600 font-medium">المدفوع للشركة: <strong>{formatEGP(property.paid_amount)} ({paidPercent}%)</strong></span>
+            <span className="text-slate-600 font-medium">
+              {t('fin.paidToDev')} <strong>{formatMoney(property.paid_amount)} ({paidPercent}%)</strong>
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-amber-500 shrink-0" />
-            <span className="text-slate-600 font-medium">الأوفر برايس: <strong>{formatEGP(property.over_price)} ({overPercent}%)</strong></span>
+            <span className="text-slate-600 font-medium">
+              {t('fin.overPrice')} <strong>{formatMoney(property.over_price)} ({overPercent}%)</strong>
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-sky-500 shrink-0" />
-            <span className="text-slate-600 font-medium">متبقي أقساط: <strong>{formatEGP(property.remaining_installments)} ({remainingPercent}%)</strong></span>
+            <span className="text-slate-600 font-medium">
+              {t('fin.remainingInstallments')} <strong>{formatMoney(property.remaining_installments)} ({remainingPercent}%)</strong>
+            </span>
           </div>
         </div>
       </div>
@@ -146,20 +164,22 @@ export default function FinancialBreakdown({ property }: FinancialBreakdownProps
           <div className="relative z-10">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-100">
-                المطلوب سداده كاش الآن للمالك
+                {t('fin.cashNowSeller')}
               </span>
               <Coins className="w-5 h-5 text-emerald-200" />
             </div>
             <div className="text-3xl font-black tracking-tight mt-2 font-mono">
-              {formatEGP(property.total_down_payment)}
+              {formatMoney(property.total_down_payment)}
             </div>
             <p className="text-xs text-emerald-100/90 mt-1">
-              عبارة عن: المدفوع للشركة ({formatEGP(property.paid_amount)}) + الأوفر برايس ({formatEGP(property.over_price)})
+              {t('fin.cashNowDesc')
+                .replace('{paid}', formatMoney(property.paid_amount))
+                .replace('{over}', formatMoney(property.over_price))}
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-emerald-500/40 text-[11px] text-emerald-100 flex items-center gap-1.5">
             <CheckCircle className="w-3.5 h-3.5 text-emerald-300" />
-            <span>يتم تسليمه للمالك وقت توقيع التنازل في مقر المطور</span>
+            <span>{t('fin.transferHandoverNote')}</span>
           </div>
         </div>
 
@@ -168,27 +188,27 @@ export default function FinancialBreakdown({ property }: FinancialBreakdownProps
           <div className="relative z-10">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
-                المتبقي أقساط مستحقة للمطور
+                {t('fin.remainingDueDev')}
               </span>
               <Receipt className="w-5 h-5 text-amber-400" />
             </div>
             <div className="text-3xl font-black tracking-tight text-white mt-2 font-mono">
-              {formatEGP(property.remaining_installments)}
+              {formatMoney(property.remaining_installments)}
             </div>
             <p className="text-xs text-slate-300 mt-1">
-              أقساط متساوية ومباشرة للمطور بدون أي فوائد إضافية
+              {t('fin.equalInstallmentsNote')}
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-amber-400" />
               <span>
-                متبقي {property.installment_years_left} سنوات قسط
+                {t('fin.yearsRemaining').replace('{years}', property.installment_years_left.toString())}
               </span>
             </div>
             {quarterlyInstallment > 0 && (
               <span className="text-amber-400 font-bold font-mono">
-                ~ {formatEGP(quarterlyInstallment)} / ربع سنوي
+                {t('fin.perQuarter').replace('{amount}', formatMoney(quarterlyInstallment))}
               </span>
             )}
           </div>
@@ -200,55 +220,55 @@ export default function FinancialBreakdown({ property }: FinancialBreakdownProps
       <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex items-center justify-between">
           <span className="text-xs font-black text-slate-800">
-            جدول تفصيل بنود الشراء والمدفوعات
+            {t('fin.tableTitle')}
           </span>
-          <span className="text-[11px] text-slate-500">القيم بالجنيه المصري</span>
+          <span className="text-[11px] text-slate-500">{t('fin.currencyNote')}</span>
         </div>
 
         <div className="divide-y divide-slate-100 text-sm">
           
           <div className="flex items-center justify-between px-5 py-3 hover:bg-slate-50/50">
-            <span className="text-slate-600 font-medium">سعر الوحدة الأصلي في عقد المطور:</span>
-            <span className="font-bold text-slate-800 font-mono">{formatEGP(property.original_price)}</span>
+            <span className="text-slate-600 font-medium">{t('fin.originalContract')}</span>
+            <span className="font-bold text-slate-800 font-mono">{formatMoney(property.original_price)}</span>
           </div>
 
           <div className="flex items-center justify-between px-5 py-3 hover:bg-slate-50/50">
             <div className="flex flex-col">
-              <span className="text-slate-700 font-semibold">المدفوع من المالك الأصلي للشركة:</span>
-              <span className="text-[11px] text-slate-400">مقدم التعاقد + الأقساط المسددة حتى اليوم</span>
+              <span className="text-slate-700 font-semibold">{t('fin.paidByOwner')}</span>
+              <span className="text-[11px] text-slate-400">{t('fin.paidByOwnerSub')}</span>
             </div>
-            <span className="font-bold text-slate-900 font-mono">{formatEGP(property.paid_amount)}</span>
+            <span className="font-bold text-slate-900 font-mono">{formatMoney(property.paid_amount)}</span>
           </div>
 
           <div className="flex items-center justify-between px-5 py-3 hover:bg-slate-50/50 bg-amber-50/30">
             <div className="flex flex-col">
-              <span className="text-amber-900 font-bold">الأوفر برايس المطلوب (Over Price):</span>
-              <span className="text-[11px] text-amber-700">مكسب المالك الأصلي فوق ما تم سداده</span>
+              <span className="text-amber-900 font-bold">{t('fin.overPriceLabel')}</span>
+              <span className="text-[11px] text-amber-700">{t('fin.overPriceSub')}</span>
             </div>
-            <span className="font-black text-amber-900 font-mono">{formatEGP(property.over_price)}</span>
+            <span className="font-black text-amber-900 font-mono">{formatMoney(property.over_price)}</span>
           </div>
 
           <div className="flex items-center justify-between px-5 py-3.5 bg-emerald-50/60 font-bold border-y border-emerald-100">
-            <span className="text-emerald-950 font-black text-base">إجمالي المطلوب كاش للمالك (المقدم + الأوفر):</span>
-            <span className="text-emerald-700 font-black text-lg font-mono">{formatEGP(property.total_down_payment)}</span>
+            <span className="text-emerald-950 font-black text-base">{t('fin.totalCashSeller')}</span>
+            <span className="text-emerald-700 font-black text-lg font-mono">{formatMoney(property.total_down_payment)}</span>
           </div>
 
           <div className="flex items-center justify-between px-5 py-3 hover:bg-slate-50/50">
             <div className="flex flex-col">
-              <span className="text-slate-700 font-semibold">إجمالي الأقساط المتبقية للمطور:</span>
-              <span className="text-[11px] text-slate-400">تدفع على أقساط ربع سنوية أو سنوية</span>
+              <span className="text-slate-700 font-semibold">{t('fin.totalRemainingDev')}</span>
+              <span className="text-[11px] text-slate-400">{t('fin.quarterlySchedule')}</span>
             </div>
-            <span className="font-bold text-slate-900 font-mono">{formatEGP(property.remaining_installments)}</span>
+            <span className="font-bold text-slate-900 font-mono">{formatMoney(property.remaining_installments)}</span>
           </div>
 
           <div className="flex items-center justify-between px-5 py-3 hover:bg-slate-50/50">
-            <span className="text-slate-600 font-medium">عدد سنوات القسط المتبقية:</span>
-            <span className="font-bold text-slate-800">{property.installment_years_left} سنوات</span>
+            <span className="text-slate-600 font-medium">{t('fin.yearsCount')}</span>
+            <span className="font-bold text-slate-800">{property.installment_years_left} {t('fin.years')}</span>
           </div>
 
           <div className="flex items-center justify-between px-5 py-3.5 bg-slate-950 text-white font-bold">
-            <span className="text-white font-black text-base">السعر الإجمالي النهائي للوحدة:</span>
-            <span className="text-amber-400 font-black text-lg font-mono">{formatEGP(property.total_price)}</span>
+            <span className="text-white font-black text-base">{t('fin.finalTotal')}</span>
+            <span className="text-amber-400 font-black text-lg font-mono">{formatMoney(property.total_price)}</span>
           </div>
 
         </div>
@@ -258,27 +278,27 @@ export default function FinancialBreakdown({ property }: FinancialBreakdownProps
       <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200/90 space-y-3">
         <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase">
           <FileCheck2 className="w-4 h-4 text-amber-600" />
-          مصاريف إضافية مرتبطة بالريسيل وإجراءات التنازل
+          {t('fin.extraFeesTitle')}
         </h4>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-            <div className="text-xs text-slate-500 font-medium">وديعة الصيانة (Maintenance Fee):</div>
+            <div className="text-xs text-slate-500 font-medium">{t('fin.maintenanceFee')}</div>
             <div className="text-lg font-black text-slate-900 mt-1 font-mono">
-              {formatEGP(property.maintenance_fee)}
+              {formatMoney(property.maintenance_fee)}
             </div>
             <div className="text-[11px] text-slate-400 mt-0.5">
-              تسدد عادة عند الاستلام حسب لائحة المطور
+              {t('fin.maintenanceSub')}
             </div>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-            <div className="text-xs text-slate-500 font-medium">رسوم التنازل بالشركة (Transfer Fee):</div>
+            <div className="text-xs text-slate-500 font-medium">{t('fin.transferFee')}</div>
             <div className="text-lg font-black text-slate-900 mt-1 font-mono">
-              {formatEGP(property.transfer_fee)}
+              {formatMoney(property.transfer_fee)}
             </div>
             <div className="text-[11px] text-slate-400 mt-0.5">
-              رسوم تغيير الملكية المعتمدة رسمياً في مقر المطور
+              {t('fin.transferFeeSub')}
             </div>
           </div>
         </div>
@@ -286,7 +306,7 @@ export default function FinancialBreakdown({ property }: FinancialBreakdownProps
         <div className="flex items-start gap-2.5 text-xs text-slate-600 pt-2 border-t border-slate-200">
           <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
           <span>
-            يتم فحص الموقف المالي للوحدة واستخراج شهادة خلو طرف (المخالصة) رسمياً من إدارة حسابات المطور قبل توقيع عقود التنازل لضمان حقوق المشتري كاملة.
+            {t('fin.clearanceGuarantee')}
           </span>
         </div>
       </div>

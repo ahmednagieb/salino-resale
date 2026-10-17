@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, Maximize2, X, Image as ImageIcon, Camera } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
+import { ChevronRight, ChevronLeft, Maximize2, X, Camera } from 'lucide-react';
 
 interface ImageGalleryProps {
   images: string[];
@@ -11,6 +12,7 @@ interface ImageGalleryProps {
 export default function ImageGallery({ images, title }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const { lang, dir } = useLanguage();
 
   const displayImages = images && images.length > 0
     ? images
@@ -18,25 +20,31 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
 
   const currentImage = displayImages[selectedIndex] || displayImages[0];
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setSelectedIndex((prev) => (prev + 1) % displayImages.length);
-  };
+  }, [displayImages.length]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setSelectedIndex((prev) => (prev - 1 + displayImages.length) % displayImages.length);
-  };
+  }, [displayImages.length]);
 
   // Keyboard navigation for lightbox
   useEffect(() => {
     if (!isLightboxOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsLightboxOpen(false);
-      if (e.key === 'ArrowRight') handlePrev();
-      if (e.key === 'ArrowLeft') handleNext();
+      if (e.key === 'ArrowRight') {
+        if (dir === 'rtl') handlePrev();
+        else handleNext();
+      }
+      if (e.key === 'ArrowLeft') {
+        if (dir === 'rtl') handleNext();
+        else handlePrev();
+      }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isLightboxOpen, displayImages.length]);
+  }, [isLightboxOpen, dir, handleNext, handlePrev]);
 
   return (
     <div className="space-y-3">
@@ -45,7 +53,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
       <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full rounded-3xl overflow-hidden bg-slate-950 shadow-2xl border border-slate-200 group">
         <img
           src={currentImage}
-          alt={`${title} - صورة ${selectedIndex + 1}`}
+          alt={`${title} - ${selectedIndex + 1}`}
           loading="eager"
           className="w-full h-full object-cover transition-all duration-500 cursor-zoom-in group-hover:scale-102"
           onClick={() => setIsLightboxOpen(true)}
@@ -55,17 +63,21 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/20 pointer-events-none" />
 
         {/* Counter Badge */}
-        <div className="absolute top-4 right-4 bg-slate-950/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-1.5 shadow-md">
+        <div className="absolute top-4 end-4 bg-slate-950/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-1.5 shadow-md">
           <Camera className="w-3.5 h-3.5 text-amber-400" />
-          <span>{selectedIndex + 1} من {displayImages.length} صور</span>
+          <span>
+            {lang === 'en'
+              ? `${selectedIndex + 1} of ${displayImages.length} photos`
+              : `${selectedIndex + 1} من ${displayImages.length} صور`}
+          </span>
         </div>
 
         {/* Fullscreen Trigger Button */}
         <button
           onClick={() => setIsLightboxOpen(true)}
-          className="absolute top-4 left-4 bg-slate-950/85 backdrop-blur-md text-white p-2.5 rounded-xl hover:bg-slate-900 border border-white/10 transition-colors shadow-md cursor-pointer"
-          title="عرض ملء الشاشة (Lightbox)"
-          aria-label="عرض ملء الشاشة"
+          className="absolute top-4 start-4 bg-slate-950/85 backdrop-blur-md text-white p-2.5 rounded-xl hover:bg-slate-900 border border-white/10 transition-colors shadow-md cursor-pointer"
+          title={lang === 'en' ? 'Fullscreen Lightbox' : 'عرض ملء الشاشة (Lightbox)'}
+          aria-label="Fullscreen"
         >
           <Maximize2 className="w-4 h-4 text-amber-400" />
         </button>
@@ -75,17 +87,17 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
           <>
             <button
               onClick={handlePrev}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-slate-950/70 hover:bg-slate-900 text-white p-3 rounded-full backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer shadow-lg"
-              aria-label="الصورة السابقة"
+              className="absolute end-4 top-1/2 -translate-y-1/2 bg-slate-950/70 hover:bg-slate-900 text-white p-3 rounded-full backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer shadow-lg"
+              aria-label="Previous"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-5 h-5 rtl:rotate-0 ltr:rotate-180" />
             </button>
             <button
               onClick={handleNext}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-slate-950/70 hover:bg-slate-900 text-white p-3 rounded-full backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer shadow-lg"
-              aria-label="الصورة التالية"
+              className="absolute start-4 top-1/2 -translate-y-1/2 bg-slate-950/70 hover:bg-slate-900 text-white p-3 rounded-full backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer shadow-lg"
+              aria-label="Next"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-5 h-5 rtl:rotate-0 ltr:rotate-180" />
             </button>
           </>
         )}
@@ -106,7 +118,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
             >
               <img
                 src={img}
-                alt={`صورة مصغرة ${idx + 1}`}
+                alt={`Thumbnail ${idx + 1}`}
                 loading="lazy"
                 className="w-full h-full object-cover"
               />
@@ -120,8 +132,8 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
         <div className="fixed inset-0 z-50 bg-slate-950/98 backdrop-blur-2xl flex items-center justify-center p-4">
           <button
             onClick={() => setIsLightboxOpen(false)}
-            className="absolute top-5 left-5 text-white/80 hover:text-white p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
-            title="إغلاق (Esc)"
+            className="absolute top-5 start-5 text-white/80 hover:text-white p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+            title="Close (Esc)"
           >
             <X className="w-6 h-6" />
           </button>
@@ -141,17 +153,17 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
               <>
                 <button
                   onClick={handlePrev}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/15 hover:bg-white/30 text-white p-3.5 rounded-full backdrop-blur-md transition-transform hover:scale-110 cursor-pointer"
-                  title="السابق (سهم يمين)"
+                  className="absolute end-4 top-1/2 -translate-y-1/2 bg-white/15 hover:bg-white/30 text-white p-3.5 rounded-full backdrop-blur-md transition-transform hover:scale-110 cursor-pointer"
+                  title="Previous"
                 >
-                  <ChevronRight className="w-6 h-6" />
+                  <ChevronRight className="w-6 h-6 rtl:rotate-0 ltr:rotate-180" />
                 </button>
                 <button
                   onClick={handleNext}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/15 hover:bg-white/30 text-white p-3.5 rounded-full backdrop-blur-md transition-transform hover:scale-110 cursor-pointer"
-                  title="التالي (سهم يسار)"
+                  className="absolute start-4 top-1/2 -translate-y-1/2 bg-white/15 hover:bg-white/30 text-white p-3.5 rounded-full backdrop-blur-md transition-transform hover:scale-110 cursor-pointer"
+                  title="Next"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <ChevronLeft className="w-6 h-6 rtl:rotate-0 ltr:rotate-180" />
                 </button>
               </>
             )}

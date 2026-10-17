@@ -84,4 +84,100 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       if (amount === null || amount === undefined || isNaN(amount)) {
         return lang === 'en' ? '0 EGP' : '0 ج.م';
       }
-      const formatted = new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en-US', {\n        maximumFractionDigits: 0,\n      }).format(amount);\n      return lang === 'en' ? `${formatted} EGP` : `${formatted} ج.م`;\n    };\n\n    const formatNum = (num: number | null | undefined): string => {\n      if (num === null || num === undefined || isNaN(num)) {\n        return '0';\n      }\n      return new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en-US').format(num);\n    };\n\n    const translateType = (type: string): string => {\n      if (lang === 'ar') return type;\n      const map: Record<string, string> = {\n        'شقة': 'Apartment',\n        'دوبلكس': 'Duplex',\n        'بنتهاوس': 'Penthouse',\n        'تاون هاوس': 'Townhouse',\n        'توين هاوس': 'Twin House',\n        'فيلا مستقلة': 'Standalone Villa',\n        'شاليه': 'Chalet',\n        'استوديو': 'Studio',\n        'الكل': 'All',\n      };\n      return map[type] || type;\n    };\n\n    const translateFinishing = (finishing: string): string => {\n      if (lang === 'ar') return finishing;\n      const map: Record<string, string> = {\n        'بدون تشطيب': 'Core & Shell',\n        'نصف تشطيب': 'Semi-Finished',\n        'تشطيب كامل': 'Fully Finished',\n        'سوبر لوكس': 'Super Lux',\n        'ألترا سوبر لوكس': 'Ultra Super Lux',\n      };\n      return map[finishing] || finishing;\n    };\n\n    const translateDelivery = (delivery: string): string => {\n      if (lang === 'ar') return delivery;\n      const map: Record<string, string> = {\n        'استلام فوري': 'Ready to Move',\n        'استلام خلال 6 أشهر': 'Within 6 Months',\n        'استلام خلال سنة': 'Within 1 Year',\n        'استلام 2026': 'Delivery 2026',\n        'استلام 2027': 'Delivery 2027',\n        'استلام 2028+': 'Delivery 2028+',\n      };\n      return map[delivery] || delivery;\n    };\n\n    const translateArea = (area: string): string => {\n      if (lang === 'ar') return area;\n      const map: Record<string, string> = {\n        'التجمع الخامس': 'New Cairo (5th Settlement)',\n        'الشيخ زايد': 'Sheikh Zayed & 6th of October',\n        'مستقبل سيتي': 'Mostakbal City',\n        'العاصمة الإدارية': 'New Administrative Capital',\n        'الساحل الشمالي': 'North Coast',\n        '6 أكتوبر': '6th of October',\n      };\n      return map[area] || area;\n    };\n\n    return {\n      lang,\n      dir,\n      isRTL,\n      setLang,\n      toggleLang,\n      t,\n      formatMoney,\n      formatNum,\n      translateType,\n      translateFinishing,\n      translateDelivery,\n      translateArea,\n    };\n  }, [lang, dir, isRTL, setLang, toggleLang]);\n\n  return (\n    <LanguageContext.Provider value={contextValue}>\n      {children}\n    </LanguageContext.Provider>\n  );\n}\n\nexport function useLanguage() {\n  const context = useContext(LanguageContext);\n  if (!context) {\n    throw new Error('useLanguage must be used within a LanguageProvider');\n  }\n  return context;\n}\n
+      const formatted = new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en-US', {
+        maximumFractionDigits: 0,
+      }).format(amount);
+      return lang === 'en' ? `${formatted} EGP` : `${formatted} ج.م`;
+    };
+
+    const formatNum = (num: number | null | undefined): string => {
+      if (num === null || num === undefined || isNaN(num)) {
+        return '0';
+      }
+      return new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en-US').format(num);
+    };
+
+    const translateType = (type: string): string => {
+      if (lang === 'ar') return type;
+      const map: Record<string, string> = {
+        'شقة': 'Apartment',
+        'دوبلكس': 'Duplex',
+        'بنتهاوس': 'Penthouse',
+        'تاون هاوس': 'Townhouse',
+        'توين هاوس': 'Twin House',
+        'فيلا مستقلة': 'Standalone Villa',
+        'شاليه': 'Chalet',
+        'استوديو': 'Studio',
+        'الكل': 'All',
+      };
+      return map[type] || type;
+    };
+
+    const translateFinishing = (finishing: string): string => {
+      if (lang === 'ar') return finishing;
+      const map: Record<string, string> = {
+        'بدون تشطيب': 'Core & Shell',
+        'نصف تشطيب': 'Semi-Finished',
+        'تشطيب كامل': 'Fully Finished',
+        'سوبر لوكس': 'Super Lux',
+        'ألترا سوبر لوكس': 'Ultra Super Lux',
+      };
+      return map[finishing] || finishing;
+    };
+
+    const translateDelivery = (delivery: string): string => {
+      if (lang === 'ar') return delivery;
+      const map: Record<string, string> = {
+        'استلام فوري': 'Ready to Move',
+        'استلام خلال 6 أشهر': 'Within 6 Months',
+        'استلام خلال سنة': 'Within 1 Year',
+        'استلام 2026': 'Delivery 2026',
+        'استلام 2027': 'Delivery 2027',
+        'استلام 2028+': 'Delivery 2028+',
+      };
+      return map[delivery] || delivery;
+    };
+
+    const translateArea = (area: string): string => {
+      if (lang === 'ar') return area;
+      const map: Record<string, string> = {
+        'التجمع الخامس': 'New Cairo (5th Settlement)',
+        'الشيخ زايد': 'Sheikh Zayed & 6th of October',
+        'مستقبل سيتي': 'Mostakbal City',
+        'العاصمة الإدارية': 'New Administrative Capital',
+        'الساحل الشمالي': 'North Coast',
+        '6 أكتوبر': '6th of October',
+      };
+      return map[area] || area;
+    };
+
+    return {
+      lang,
+      dir,
+      isRTL,
+      setLang,
+      toggleLang,
+      t,
+      formatMoney,
+      formatNum,
+      translateType,
+      translateFinishing,
+      translateDelivery,
+      translateArea,
+    };
+  }, [lang, dir, isRTL, setLang, toggleLang]);
+
+  return (
+    <LanguageContext.Provider value={contextValue}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+}

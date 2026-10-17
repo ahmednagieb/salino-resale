@@ -4,23 +4,14 @@ import { useState } from 'react';
 import { submitSellerUnit } from '@/lib/dataService';
 import { formatEGP } from '@/lib/utils';
 import { 
-  Building2, 
   Coins, 
   CheckCircle2, 
   User, 
-  Phone, 
   Home, 
-  Maximize2, 
-  FileText, 
   Send, 
   Sparkles,
-  ShieldCheck,
   Calculator,
   MessageCircle,
-  TrendingUp,
-  Flame,
-  Check,
-  HelpCircle,
   Lock
 } from 'lucide-react';
 import Link from 'next/link';
@@ -108,8 +99,8 @@ export default function SellPropertyPage() {
       } else {
         setErrorMsg('حدث خطأ أثناء إرسال البيانات. برجاء المحاولة مجدداً.');
       }
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'حدث خطأ غير متوقع');
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
     } finally {
       setIsSubmitting(false);
     }

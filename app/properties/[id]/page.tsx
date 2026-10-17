@@ -31,9 +31,7 @@ import {
   Shield,
   Coffee,
   Car,
-  Eye,
-  FileCheck2,
-  Check
+  Eye
 } from 'lucide-react';
 
 interface PropertyPageProps {

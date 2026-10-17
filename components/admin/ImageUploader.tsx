@@ -5,14 +5,12 @@ import { uploadPropertyImage, UploadProgressInfo } from '@/lib/imageUpload';
 import { formatFileSize } from '@/lib/utils';
 import { 
   UploadCloud, 
-  CheckCircle2, 
-  AlertCircle, 
   Trash2, 
-  FileImage, 
   Sparkles,
   Zap,
   ArrowRight
 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ImageUploaderProps {
   referenceCode: string;
@@ -25,6 +23,7 @@ export default function ImageUploader({
   existingImages = [],
   onChange,
 }: ImageUploaderProps) {
+  const { t, lang, isRTL } = useLanguage();
   const [images, setImages] = useState<string[]>(existingImages);
   const [uploadQueue, setUploadQueue] = useState<UploadProgressInfo[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -64,14 +63,14 @@ export default function ImageUploader({
           onChange(updated);
           return updated;
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         setUploadQueue((currentQueue) =>
           currentQueue.map((item) =>
             item.fileName === file.name
               ? {
                   ...item,
                   status: 'error',
-                  errorMessage: err?.message || 'خطأ أثناء الرفع',
+                  errorMessage: err instanceof Error ? err.message : (lang === 'ar' ? 'خطأ أثناء الرفع' : 'Upload error'),
                 }
               : item
           )
@@ -109,10 +108,14 @@ export default function ImageUploader({
           </div>
           <div>
             <span className="font-bold text-white block">
-              نظام ضغط الصور التلقائي المتطور (Supabase Free-Tier Optimizer):
+              {lang === 'ar'
+                ? 'نظام ضغط الصور التلقائي المتطور (Supabase Free-Tier Optimizer):'
+                : 'Automatic Image Compression (Supabase Free-Tier Optimizer):'}
             </span>
             <span>
-              يتم تحويل كافة الصور في المتصفح إلى صيغة WebP متقدمة بحجم أقصى 150KB لحماية مساحة وحركة بيانات السحابة المجانية.
+              {lang === 'ar'
+                ? 'يتم تحويل كافة الصور في المتصفح إلى صيغة WebP متقدمة بحجم أقصى 150KB لحماية مساحة وحركة بيانات السحابة المجانية.'
+                : 'All photos are converted client-side into modern WebP (max 150KB) to protect free-tier storage & bandwidth.'}
             </span>
           </div>
         </div>
@@ -155,10 +158,10 @@ export default function ImageUploader({
           </div>
           <div>
             <p className="text-sm font-bold text-white">
-              اضغط لاختيار الصور أو اسحبها وأفلتها هنا
+              {t('admin.upload.dragText')}
             </p>
             <p className="text-xs text-slate-400 mt-1">
-              يدعم PNG, JPG, JPEG, WEBP (الضغط إلى 150KB تلقائياً)
+              {t('admin.upload.specs')}
             </p>
           </div>
         </div>
@@ -169,7 +172,7 @@ export default function ImageUploader({
         <div className="space-y-2 bg-slate-900/80 rounded-2xl p-4 border border-slate-800">
           <h5 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            حالة المعالجة وضغط الصور:
+            {lang === 'ar' ? 'حالة المعالجة وضغط الصور:' : 'Processing & Compression Queue:'}
           </h5>
 
           <div className="space-y-2.5">
@@ -185,17 +188,17 @@ export default function ImageUploader({
                       {item.fileName}
                     </span>
 
-                    {/* Before & After File Size Tag (Required) */}
+                    {/* Before & After File Size Tag */}
                     <div className="flex items-center gap-1.5 font-mono text-[11px]">
                       <span className="text-slate-400">{formatFileSize(item.originalSize)}</span>
                       {item.compressedSize > 0 && (
                         <>
-                          <ArrowRight className="w-3 h-3 text-amber-400 rotate-180" />
+                          <ArrowRight className={`w-3 h-3 text-amber-400 ${isRTL ? 'rotate-180' : ''}`} />
                           <span className="text-emerald-400 font-bold">
                             {formatFileSize(item.compressedSize)}
                           </span>
                           <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1 rounded">
-                            توفير {savings}%
+                            {t('admin.upload.savedPct').replace('{pct}', savings.toString())}
                           </span>
                         </>
                       )}
@@ -218,10 +221,10 @@ export default function ImageUploader({
 
                   <div className="flex items-center justify-between text-[10px] text-slate-400">
                     <span>
-                      {item.status === 'compressing' && 'جاري الضغط وتحويل WebP...'}
-                      {item.status === 'uploading' && 'جاري الرفع إلى Supabase Storage...'}
-                      {item.status === 'completed' && 'اكتمل الضغط والرفع بنجاح!'}
-                      {item.status === 'error' && (item.errorMessage || 'فشل الرفع')}
+                      {item.status === 'compressing' && t('admin.upload.compressing')}
+                      {item.status === 'uploading' && t('admin.upload.uploading')}
+                      {item.status === 'completed' && t('admin.upload.done')}
+                      {item.status === 'error' && (item.errorMessage || (lang === 'ar' ? 'فشل الرفع' : 'Upload failed'))}
                     </span>
                     <span>{item.progress}%</span>
                   </div>
@@ -236,9 +239,11 @@ export default function ImageUploader({
       {images.length > 0 && (
         <div className="space-y-2 pt-2">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>الصور المرفوعة ({images.length})</span>
+            <span>
+              {lang === 'ar' ? `الصور المرفوعة (${images.length})` : `Uploaded Photos (${images.length})`}
+            </span>
             <span className="text-amber-400 font-normal text-[11px]">
-              * أول صورة هي الصورة الرئيسية (Thumbnail)
+              {lang === 'ar' ? '* أول صورة هي الصورة الرئيسية (Hero)' : '* First photo is the primary hero image'}
             </span>
           </div>
 
@@ -252,14 +257,14 @@ export default function ImageUploader({
               >
                 <img
                   src={imgUrl}
-                  alt={`صورة ${idx + 1}`}
+                  alt={`photo ${idx + 1}`}
                   className="w-full h-full object-cover"
                 />
 
                 {/* Primary Badge */}
                 {idx === 0 && (
-                  <span className="absolute top-1.5 right-1.5 bg-amber-500 text-slate-950 font-black text-[9px] px-1.5 py-0.5 rounded shadow">
-                    الرئيسية
+                  <span className="absolute top-1.5 end-1.5 bg-amber-500 text-slate-950 font-black text-[9px] px-1.5 py-0.5 rounded shadow">
+                    {t('admin.upload.mainBadge')}
                   </span>
                 )}
 
@@ -269,17 +274,17 @@ export default function ImageUploader({
                     <button
                       type="button"
                       onClick={() => handleSetPrimary(idx)}
-                      className="bg-amber-500 text-slate-950 text-[10px] font-bold px-2 py-1 rounded hover:bg-amber-400"
-                      title="تعيين كصورة رئيسية"
+                      className="bg-amber-500 text-slate-950 text-[10px] font-bold px-2 py-1 rounded hover:bg-amber-400 cursor-pointer"
+                      title={lang === 'ar' ? 'تعيين كصورة رئيسية' : 'Set as hero image'}
                     >
-                      تعيين كرئيسية
+                      {lang === 'ar' ? 'تعيين كرئيسية' : 'Set Hero'}
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(idx)}
-                    className="p-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg"
-                    title="حذف الصورة"
+                    className="p-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg cursor-pointer"
+                    title={t('admin.upload.deleteImg')}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

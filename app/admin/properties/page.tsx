@@ -1,34 +1,40 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ResaleProperty, Compound } from '@/types/database';
+import { useState, useEffect, useCallback } from 'react';
+import { ResaleProperty, Compound, PropertyStatus } from '@/types/database';
 import { 
   getProperties, 
   getCompounds, 
   saveProperty, 
   markAsSoldAndCleanStorage 
 } from '@/lib/dataService';
-import { formatEGP, generateReferenceCode } from '@/lib/utils';
+import { generateReferenceCode } from '@/lib/utils';
 import ImageUploader from '@/components/admin/ImageUploader';
 import { 
   PlusCircle, 
   Search, 
-  Trash2, 
   Edit, 
   ExternalLink, 
-  CheckCircle, 
   CheckCircle2, 
-  AlertTriangle, 
   X, 
   Sparkles,
   Zap,
   Building,
-  Coins,
-  RefreshCw
+  Coins
 } from 'lucide-react';
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function AdminPropertiesPage() {
+  const { 
+    t, 
+    lang, 
+    formatMoney, 
+    translateType, 
+    translateFinishing, 
+    translateArea 
+  } = useLanguage();
+
   const [properties, setProperties] = useState<ResaleProperty[]>([]);
   const [compounds, setCompounds] = useState<Compound[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,11 +47,7 @@ export default function AdminPropertiesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     const [propsData, compsData] = await Promise.all([
       getProperties(),
@@ -54,7 +56,21 @@ export default function AdminPropertiesPage() {
     setProperties(propsData);
     setCompounds(compsData);
     setLoading(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([getProperties(), getCompounds()]).then(([propsData, compsData]) => {
+      if (isMounted) {
+        setProperties(propsData);
+        setCompounds(compsData);
+        setLoading(false);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleOpenAdd = () => {
     const newRef = generateReferenceCode(properties.length);
@@ -98,31 +114,32 @@ export default function AdminPropertiesPage() {
     setIsSaving(true);
     try {
       const saved = await saveProperty(editingProperty);
-      setActionNotice(`تم حفظ الوحدة كود ${saved.reference_code} بنجاح!`);
+      setActionNotice(
+        lang === 'ar'
+          ? `تم حفظ الوحدة كود ${saved.reference_code} بنجاح!`
+          : `Property ${saved.reference_code} saved successfully!`
+      );
       setIsModalOpen(false);
       await loadData();
-    } catch (err: any) {
-      alert(`خطأ أثناء الحفظ: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setIsSaving(false);
     }
   };
 
-  // "Mark as Sold & Clean Storage" Action (Required Critical Feature)
+  // "Mark as Sold & Clean Storage" Action
   const handleMarkAsSoldAndClean = async (property: ResaleProperty) => {
-    const confirmText = `هل أنت متأكد من تمييز الوحدة (${property.reference_code}) كـ "تم البيع"؟
-سيتم تلقائياً حذف كافة الصور الإضافية من Supabase Storage للحفاظ على باقة Free-Tier مع الاحتفاظ بالصورة الرئيسية فقط.`;
-
-    if (!window.confirm(confirmText)) return;
+    if (!window.confirm(t('admin.props.markSoldConfirm'))) return;
 
     try {
       const updated = await markAsSoldAndCleanStorage(property.id);
       if (updated) {
-        setActionNotice(`تم بيع الوحدة ${property.reference_code} وتنظيف الصور الإضافية من السحابة بنجاح! تم توفير مساحة التخزين.`);
+        setActionNotice(t('admin.props.soldCleanSuccess'));
         await loadData();
       }
-    } catch (err: any) {
-      alert(`خطأ: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Error: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -131,7 +148,8 @@ export default function AdminPropertiesPage() {
     const matchesSearch =
       p.title_ar.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.reference_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.compound?.name_ar.toLowerCase().includes(searchQuery.toLowerCase());
+      (p.compound?.name_ar && p.compound.name_ar.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (p.compound?.name_en && p.compound.name_en.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -144,10 +162,10 @@ export default function AdminPropertiesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white">
-            إدارة وحدات وعقارات الريسيل
+            {t('admin.props.title')}
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            إضافة وتعديل عروض الملاك، رفع الصور المحسنة (WebP)، وتفريغ مساحات التخزين
+            {t('admin.props.subtitle')}
           </p>
         </div>
 
@@ -156,7 +174,7 @@ export default function AdminPropertiesPage() {
           className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all hover:scale-102 cursor-pointer"
         >
           <PlusCircle className="w-4 h-4 text-slate-950" />
-          <span>إضافة وحدة ريسيل جديدة</span>
+          <span>{t('admin.props.addNew')}</span>
         </button>
       </div>
 
@@ -167,7 +185,7 @@ export default function AdminPropertiesPage() {
             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
             <span>{actionNotice}</span>
           </div>
-          <button onClick={() => setActionNotice(null)} className="text-slate-400 hover:text-white">
+          <button onClick={() => setActionNotice(null)} className="text-slate-400 hover:text-white cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -178,28 +196,28 @@ export default function AdminPropertiesPage() {
         
         {/* Search */}
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute start-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="بحث بالكود (RES-101) أو الاسم أو الكمبوند..."
+            placeholder={t('admin.props.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl pr-10 pl-4 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full bg-slate-950 border border-slate-700 rounded-xl ps-10 pe-4 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>
 
         {/* Status Filter Tabs */}
         <div className="flex items-center gap-1.5 self-stretch sm:self-auto overflow-x-auto text-xs">
           {[
-            { id: 'all', label: 'الكل' },
-            { id: 'available', label: 'متاح للبيع' },
-            { id: 'sold', label: 'تم البيع' },
-            { id: 'pending', label: 'حجز مبدئي' },
+            { id: 'all', label: t('admin.props.tabAll') },
+            { id: 'available', label: t('admin.props.tabAvailable') },
+            { id: 'pending', label: t('admin.props.tabPending') },
+            { id: 'sold', label: t('admin.props.tabSold') },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setStatusFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg font-bold transition-colors whitespace-nowrap cursor-pointer ${
                 statusFilter === tab.id
                   ? 'bg-amber-500 text-slate-950'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
@@ -215,20 +233,33 @@ export default function AdminPropertiesPage() {
       {/* Properties Table */}
       <div className="bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
-          <table className="w-full text-right text-xs">
+          <table className="w-full text-start text-xs">
             <thead className="bg-slate-950 text-slate-400 font-bold border-b border-slate-800">
               <tr>
-                <th className="py-3.5 px-4">الوحدة والكمبوند</th>
-                <th className="py-3.5 px-4">المواصفات</th>
-                <th className="py-3.5 px-4">المطلوب كاش الآن</th>
-                <th className="py-3.5 px-4">المتبقي أقساط</th>
-                <th className="py-3.5 px-4">السعر الإجمالي</th>
-                <th className="py-3.5 px-4">الحالة</th>
-                <th className="py-3.5 px-4 text-center">الإجراءات</th>
+                <th className="py-3.5 px-4 text-start">{t('admin.props.colUnit')}</th>
+                <th className="py-3.5 px-4 text-start">{t('admin.props.colSpecs')}</th>
+                <th className="py-3.5 px-4 text-start">{t('admin.props.colCashNow')}</th>
+                <th className="py-3.5 px-4 text-start">{t('admin.props.colRemaining')}</th>
+                <th className="py-3.5 px-4 text-start">{t('admin.props.colTotal')}</th>
+                <th className="py-3.5 px-4 text-start">{t('admin.props.colStatus')}</th>
+                <th className="py-3.5 px-4 text-center">{t('admin.props.colActions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/80 text-slate-200">
-              {filteredProperties.map((prop) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-slate-400">
+                    {t('admin.props.loading')}
+                  </td>
+                </tr>
+              ) : filteredProperties.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-slate-500">
+                    {t('admin.props.noUnits')}
+                  </td>
+                </tr>
+              ) : (
+                filteredProperties.map((prop) => (
                 <tr key={prop.id} className="hover:bg-slate-800/50 transition-colors">
                   
                   {/* Property Info */}
@@ -251,8 +282,10 @@ export default function AdminPropertiesPage() {
                           </span>
                         </div>
                         <div className="text-[11px] text-slate-400 flex items-center gap-1">
-                          <Building className="w-3 h-3 text-amber-500" />
-                          <span>{prop.compound?.name_ar || 'كمبوند راقي'} ({prop.compound?.area_name})</span>
+                          <Building className="w-3 h-3 text-amber-500 shrink-0" />
+                          <span>
+                            {lang === 'ar' ? (prop.compound?.name_ar || 'كمبوند راقي') : (prop.compound?.name_en || prop.compound?.name_ar || 'Compound')} ({translateArea(prop.compound?.area_name || '')})
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -260,29 +293,33 @@ export default function AdminPropertiesPage() {
 
                   {/* Specs */}
                   <td className="py-4 px-4 text-slate-300">
-                    <div>{prop.property_type} • {prop.area_sqm} م²</div>
-                    <div className="text-[11px] text-slate-400">{prop.bedrooms} غرف • {prop.finishing_type}</div>
+                    <div>{translateType(prop.property_type)} • {prop.area_sqm} m²</div>
+                    <div className="text-[11px] text-slate-400">
+                      {prop.bedrooms} {lang === 'ar' ? 'غرف' : 'beds'} • {translateFinishing(prop.finishing_type)}
+                    </div>
                   </td>
 
                   {/* Down Payment */}
                   <td className="py-4 px-4">
                     <span className="text-emerald-400 font-bold block text-sm">
-                      {formatEGP(prop.total_down_payment)}
+                      {formatMoney(prop.total_down_payment)}
                     </span>
                     <span className="text-[10px] text-slate-400">
-                      أوفر: {formatEGP(prop.over_price)}
+                      {t('admin.props.over')} {formatMoney(prop.over_price)}
                     </span>
                   </td>
 
                   {/* Remaining */}
                   <td className="py-4 px-4 text-slate-300 font-medium">
-                    <div>{formatEGP(prop.remaining_installments)}</div>
-                    <div className="text-[10px] text-slate-400">على {prop.installment_years_left} سنوات</div>
+                    <div>{formatMoney(prop.remaining_installments)}</div>
+                    <div className="text-[10px] text-slate-400">
+                      {prop.installment_years_left} {t('admin.props.yearsLeft')}
+                    </div>
                   </td>
 
                   {/* Total */}
                   <td className="py-4 px-4 font-bold text-white">
-                    {formatEGP(prop.total_price)}
+                    {formatMoney(prop.total_price)}
                   </td>
 
                   {/* Status Badge */}
@@ -294,7 +331,7 @@ export default function AdminPropertiesPage() {
                         ? 'bg-amber-950/80 text-amber-300 border border-amber-500/30'
                         : 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30'
                     }`}>
-                      {prop.status === 'sold' ? 'تم البيع' : prop.status === 'pending' ? 'حجز مبدئي' : 'متاح للبيع'}
+                      {prop.status === 'sold' ? t('admin.props.statusSold') : prop.status === 'pending' ? t('admin.props.statusPending') : t('admin.props.statusAvailable')}
                     </span>
                   </td>
 
@@ -306,8 +343,8 @@ export default function AdminPropertiesPage() {
                       <Link
                         href={`/properties/${prop.id}`}
                         target="_blank"
-                        className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg"
-                        title="معاينة في الموقع"
+                        className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg cursor-pointer"
+                        title={t('admin.props.viewUnit')}
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                       </Link>
@@ -315,8 +352,8 @@ export default function AdminPropertiesPage() {
                       {/* Edit */}
                       <button
                         onClick={() => handleOpenEdit(prop)}
-                        className="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg"
-                        title="تعديل بيانات الوحدة"
+                        className="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg cursor-pointer"
+                        title={t('admin.common.edit')}
                       >
                         <Edit className="w-3.5 h-3.5" />
                       </button>
@@ -325,11 +362,11 @@ export default function AdminPropertiesPage() {
                       {prop.status !== 'sold' && (
                         <button
                           onClick={() => handleMarkAsSoldAndClean(prop)}
-                          className="flex items-center gap-1 bg-rose-950/90 hover:bg-rose-900 text-rose-300 text-[10px] font-bold py-1.5 px-2.5 rounded-lg border border-rose-500/40 transition-colors"
-                          title="تم البيع وحذف الصور الإضافية لتوفير المساحة"
+                          className="flex items-center gap-1 bg-rose-950/90 hover:bg-rose-900 text-rose-300 text-[10px] font-bold py-1.5 px-2.5 rounded-lg border border-rose-500/40 transition-colors cursor-pointer"
+                          title={t('admin.props.markSoldAndClean')}
                         >
                           <Zap className="w-3 h-3 text-rose-400" />
-                          <span>بيع وتنظيف التخزين</span>
+                          <span className="hidden lg:inline">{t('admin.props.markSoldAndClean')}</span>
                         </button>
                       )}
 
@@ -337,7 +374,7 @@ export default function AdminPropertiesPage() {
                   </td>
 
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>
@@ -352,12 +389,12 @@ export default function AdminPropertiesPage() {
               <h3 className="text-lg font-black text-white flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-400" />
                 <span>
-                  {editingProperty.id ? 'تعديل بيانات وحدة ريسيل' : 'إضافة وحدة ريسيل جديدة'}
+                  {editingProperty.id ? t('admin.props.editTitle') : t('admin.props.addTitle')}
                 </span>
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg"
+                className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -368,7 +405,7 @@ export default function AdminPropertiesPage() {
               {/* Row 1: Code & Compound */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">كود الوحدة (Reference Code) *</label>
+                  <label className="text-xs font-bold text-slate-300">{t('admin.props.refCode')} *</label>
                   <input
                     type="text"
                     required
@@ -379,7 +416,7 @@ export default function AdminPropertiesPage() {
                 </div>
 
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-300">الكمبوند *</label>
+                  <label className="text-xs font-bold text-slate-300">{t('admin.props.compound')} *</label>
                   <select
                     value={editingProperty.compound_id || ''}
                     onChange={(e) => setEditingProperty({ ...editingProperty, compound_id: e.target.value })}
@@ -387,7 +424,7 @@ export default function AdminPropertiesPage() {
                   >
                     {compounds.map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.name_ar} - {c.area_name} ({c.developer_name})
+                        {lang === 'ar' ? c.name_ar : (c.name_en || c.name_ar)} - {translateArea(c.area_name)} ({c.developer_name})
                       </option>
                     ))}
                   </select>
@@ -396,11 +433,11 @@ export default function AdminPropertiesPage() {
 
               {/* Title & Description */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">عنوان الإعلان *</label>
+                <label className="text-xs font-bold text-slate-300">{t('admin.props.titleAr')} *</label>
                 <input
                   type="text"
                   required
-                  placeholder="مثال: شقة ريسيل بحري فيو لاندسكيب في ميفيدا التجمع الخامس"
+                  placeholder={lang === 'ar' ? 'مثال: شقة ريسيل بحري فيو لاندسكيب في ميفيدا التجمع الخامس' : 'e.g. 3BR Prime Resale in Mivida New Cairo'}
                   value={editingProperty.title_ar || ''}
                   onChange={(e) => setEditingProperty({ ...editingProperty, title_ar: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white"
@@ -408,7 +445,7 @@ export default function AdminPropertiesPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">الوصف والتفاصيل</label>
+                <label className="text-xs font-bold text-slate-300">{t('admin.props.descAr')}</label>
                 <textarea
                   rows={3}
                   value={editingProperty.description_ar || ''}
@@ -420,24 +457,24 @@ export default function AdminPropertiesPage() {
               {/* Specs Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">نوع العقار</label>
+                  <label className="text-xs font-bold text-slate-300">{t('admin.props.propType')}</label>
                   <select
                     value={editingProperty.property_type || 'شقة'}
                     onChange={(e) => setEditingProperty({ ...editingProperty, property_type: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
                   >
-                    <option value="شقة">شقة</option>
-                    <option value="دوبلكس">دوبلكس</option>
-                    <option value="تاون هاوس">تاون هاوس</option>
-                    <option value="توين هاوس">توين هاوس</option>
-                    <option value="فيلا مستقلة">فيلا مستقلة</option>
-                    <option value="بنتهاوس">بنتهاوس</option>
-                    <option value="شاليه">شاليه</option>
+                    <option value="شقة">{translateType('شقة')}</option>
+                    <option value="دوبلكس">{translateType('دوبلكس')}</option>
+                    <option value="تاون هاوس">{translateType('تاون هاوس')}</option>
+                    <option value="توين هاوس">{translateType('توين هاوس')}</option>
+                    <option value="فيلا مستقلة">{translateType('فيلا مستقلة')}</option>
+                    <option value="بنتهاوس">{translateType('بنتهاوس')}</option>
+                    <option value="شاليه">{translateType('شاليه')}</option>
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">المساحة (م²)</label>
+                  <label className="text-xs font-bold text-slate-300">{t('admin.props.areaSqm')}</label>
                   <input
                     type="number"
                     value={editingProperty.area_sqm || 0}
@@ -447,7 +484,7 @@ export default function AdminPropertiesPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">غرف النوم</label>
+                  <label className="text-xs font-bold text-slate-300">{t('admin.props.bedrooms')}</label>
                   <input
                     type="number"
                     value={editingProperty.bedrooms || 1}
@@ -457,7 +494,7 @@ export default function AdminPropertiesPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">الحمامات</label>
+                  <label className="text-xs font-bold text-slate-300">{t('admin.props.bathrooms')}</label>
                   <input
                     type="number"
                     value={editingProperty.bathrooms || 1}
@@ -467,37 +504,37 @@ export default function AdminPropertiesPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">التشطيب</label>
+                  <label className="text-xs font-bold text-slate-300">{t('admin.props.finishing')}</label>
                   <select
                     value={editingProperty.finishing_type || 'نصف تشطيب'}
                     onChange={(e) => setEditingProperty({ ...editingProperty, finishing_type: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
                   >
-                    <option value="بدون تشطيب">بدون تشطيب</option>
-                    <option value="نصف تشطيب">نصف تشطيب</option>
-                    <option value="تشطيب كامل">تشطيب كامل</option>
-                    <option value="سوبر لوكس">سوبر لوكس</option>
-                    <option value="ألترا سوبر لوكس">ألترا سوبر لوكس</option>
+                    <option value="بدون تشطيب">{translateFinishing('بدون تشطيب')}</option>
+                    <option value="نصف تشطيب">{translateFinishing('نصف تشطيب')}</option>
+                    <option value="تشطيب كامل">{translateFinishing('تشطيب كامل')}</option>
+                    <option value="سوبر لوكس">{translateFinishing('سوبر لوكس')}</option>
+                    <option value="ألترا سوبر لوكس">{translateFinishing('ألترا سوبر لوكس')}</option>
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">حالة الاستلام</label>
+                  <label className="text-xs font-bold text-slate-300">{t('admin.props.deliveryStatus')}</label>
                   <select
                     value={editingProperty.delivery_status || 'استلام فوري'}
                     onChange={(e) => setEditingProperty({ ...editingProperty, delivery_status: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
                   >
-                    <option value="استلام فوري">استلام فوري</option>
-                    <option value="استلام خلال 6 أشهر">استلام خلال 6 أشهر</option>
-                    <option value="استلام خلال سنة">استلام خلال سنة</option>
-                    <option value="استلام 2026">استلام 2026</option>
-                    <option value="استلام 2027">استلام 2027</option>
+                    <option value="استلام فوري">{lang === 'ar' ? 'استلام فوري' : 'Ready to Move'}</option>
+                    <option value="استلام خلال 6 أشهر">{lang === 'ar' ? 'استلام خلال 6 أشهر' : 'Within 6 Months'}</option>
+                    <option value="استلام خلال سنة">{lang === 'ar' ? 'استلام خلال سنة' : 'Within 1 Year'}</option>
+                    <option value="استلام 2026">{lang === 'ar' ? 'استلام 2026' : 'Delivery 2026'}</option>
+                    <option value="استلام 2027">{lang === 'ar' ? 'استلام 2027' : 'Delivery 2027'}</option>
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">الدور</label>
+                  <label className="text-xs font-bold text-slate-300">{t('admin.props.floor')}</label>
                   <input
                     type="number"
                     value={editingProperty.floor_number || 1}
@@ -507,29 +544,29 @@ export default function AdminPropertiesPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">حالة العرض</label>
+                  <label className="text-xs font-bold text-slate-300">{t('admin.props.listingStatus')}</label>
                   <select
                     value={editingProperty.status || 'available'}
-                    onChange={(e) => setEditingProperty({ ...editingProperty, status: e.target.value as any })}
+                    onChange={(e) => setEditingProperty({ ...editingProperty, status: e.target.value as PropertyStatus })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
                   >
-                    <option value="available">متاح للبيع</option>
-                    <option value="pending">حجز مبدئي</option>
-                    <option value="sold">تم البيع</option>
+                    <option value="available">{t('admin.props.statusAvailable')}</option>
+                    <option value="pending">{t('admin.props.statusPending')}</option>
+                    <option value="sold">{t('admin.props.statusSold')}</option>
                   </select>
                 </div>
               </div>
 
-              {/* Financial Inputs (Crucial for Resale) */}
+              {/* Financial Inputs */}
               <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-4">
                 <div className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
                   <Coins className="w-4 h-4" />
-                  <span>البيانات المالية للريسيل (تحديث تلقائي للمقدم والإجمالي)</span>
+                  <span>{t('admin.props.financialInfo')}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-400">المدفوع للشركة *</label>
+                    <label className="text-[11px] font-bold text-slate-400">{t('admin.props.paidAmount')} *</label>
                     <input
                       type="number"
                       required
@@ -550,7 +587,7 @@ export default function AdminPropertiesPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-amber-400">الأوفر برايس المطلوب *</label>
+                    <label className="text-[11px] font-bold text-amber-400">{t('admin.props.overPrice')} *</label>
                     <input
                       type="number"
                       required
@@ -571,14 +608,14 @@ export default function AdminPropertiesPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-emerald-400">إجمالي المطلوب كاش (محسوب)</label>
+                    <label className="text-[11px] font-bold text-emerald-400">{t('admin.props.calcDownPayment')}</label>
                     <div className="w-full bg-slate-900/60 border border-emerald-500/30 rounded-xl px-3 py-2 text-xs text-emerald-400 font-bold">
-                      {formatEGP((editingProperty.paid_amount || 0) + (editingProperty.over_price || 0))}
+                      {formatMoney((editingProperty.paid_amount || 0) + (editingProperty.over_price || 0))}
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-400">المتبقي أقساط للمطور</label>
+                    <label className="text-[11px] font-bold text-slate-400">{t('admin.props.remainingInst')}</label>
                     <input
                       type="number"
                       value={editingProperty.remaining_installments || 0}
@@ -597,7 +634,7 @@ export default function AdminPropertiesPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-400">سنوات القسط المتبقية</label>
+                    <label className="text-[11px] font-bold text-slate-400">{t('admin.props.yearsLeftLabel')}</label>
                     <input
                       type="number"
                       step="0.5"
@@ -608,9 +645,9 @@ export default function AdminPropertiesPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-400">السعر الإجمالي النهائي</label>
+                    <label className="text-[11px] font-bold text-slate-400">{t('admin.props.calcTotal')}</label>
                     <div className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold">
-                      {formatEGP((editingProperty.paid_amount || 0) + (editingProperty.over_price || 0) + (editingProperty.remaining_installments || 0))}
+                      {formatMoney((editingProperty.paid_amount || 0) + (editingProperty.over_price || 0) + (editingProperty.remaining_installments || 0))}
                     </div>
                   </div>
                 </div>
@@ -619,7 +656,7 @@ export default function AdminPropertiesPage() {
               {/* Strict Supabase Free-Tier Image Uploader Component */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-300">
-                  صور الوحدة (مع الضغط التلقائي السحابي الفوري)
+                  {t('admin.props.mediaSection')}
                 </label>
                 <ImageUploader
                   referenceCode={editingProperty.reference_code || 'RES-NEW'}
@@ -633,16 +670,16 @@ export default function AdminPropertiesPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white cursor-pointer"
                 >
-                  إلغاء
+                  {t('admin.common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-6 py-2.5 rounded-xl shadow-lg transition-all"
+                  className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-6 py-2.5 rounded-xl shadow-lg transition-all cursor-pointer"
                 >
-                  {isSaving ? 'جاري الحفظ...' : 'حفظ الوحدة'}
+                  {isSaving ? t('admin.common.saving') : t('admin.props.savePropertyBtn')}
                 </button>
               </div>
 

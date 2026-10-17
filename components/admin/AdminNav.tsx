@@ -8,20 +8,22 @@ import {
   Inbox, 
   MapPin, 
   ExternalLink, 
-  LogOut, 
   CheckCircle2, 
   AlertCircle 
 } from 'lucide-react';
 import { isSupabaseConfigured } from '@/lib/supabaseClient';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function AdminNav() {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   const navItems = [
-    { label: 'نظرة عامة', href: '/admin', icon: Home },
-    { label: 'إدارة وحدات الريسيل', href: '/admin/properties', icon: Building2 },
-    { label: 'صندوق طلبات الملاك', href: '/admin/submissions', icon: Inbox },
-    { label: 'الكمبوندات والمناطق', href: '/admin/compounds', icon: MapPin },
+    { label: t('admin.nav.overview'), href: '/admin', icon: Home },
+    { label: t('admin.nav.properties'), href: '/admin/properties', icon: Building2 },
+    { label: t('admin.nav.submissions'), href: '/admin/submissions', icon: Inbox },
+    { label: t('admin.nav.compounds'), href: '/admin/compounds', icon: MapPin },
   ];
 
   return (
@@ -30,16 +32,17 @@ export default function AdminNav() {
         <div className="flex items-center justify-between h-16">
           
           {/* Logo & Badge */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link href="/admin" className="flex items-center gap-2 font-black text-lg text-white">
               <span className="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-sm">
                 S
               </span>
-              <span>لوحة تحكم سالينو</span>
+              <span className="hidden sm:inline">{t('admin.nav.brand')}</span>
+              <span className="sm:hidden">Salino Admin</span>
             </Link>
 
             {/* Supabase Status Pill */}
-            <div className={`hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${
+            <div className={`hidden lg:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${
               isSupabaseConfigured
                 ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-400'
                 : 'bg-amber-950/80 border-amber-500/40 text-amber-300'
@@ -47,12 +50,12 @@ export default function AdminNav() {
               {isSupabaseConfigured ? (
                 <>
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>متصل بقاعدة Supabase</span>
+                  <span>{t('admin.nav.supabaseConnected')}</span>
                 </>
               ) : (
                 <>
                   <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
-                  <span>وضع المعاينة (Demo Mode)</span>
+                  <span>{t('admin.nav.demoMode')}</span>
                 </>
               )}
             </div>
@@ -80,14 +83,15 @@ export default function AdminNav() {
             })}
           </nav>
 
-          {/* Public Link */}
-          <div className="flex items-center gap-3">
+          {/* Public Link & Language Switcher */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <LanguageSwitcher variant="navbar" />
             <Link
               href="/"
               target="_blank"
               className="flex items-center gap-1.5 text-xs text-slate-300 hover:text-amber-400 bg-slate-800/80 hover:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 transition-colors"
             >
-              <span>الموقع العام</span>
+              <span className="hidden sm:inline">{t('admin.nav.publicSite')}</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
           </div>

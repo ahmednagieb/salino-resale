@@ -31,7 +31,8 @@ export function generateWhatsAppLink(
   referenceCode: string,
   title: string,
   propertyId: string,
-  customPhone?: string
+  customPhone?: string,
+  lang: 'ar' | 'en' | string = 'ar'
 ): string {
   const phone = customPhone || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '201000000000';
   const cleanPhone = phone.replace(/[^0-9]/g, '');
@@ -40,11 +41,9 @@ export function generateWhatsAppLink(
   const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://salino-resale.com';
   const propertyUrl = `${siteUrl}/properties/${propertyId}`;
 
-  const message = `السلام عليكم ورحمة الله،
-أنا مهتم بالوحدة ريسيل كود (${referenceCode}) - ${title}
-رابط الوحدة: ${propertyUrl}
-
-برجاء تزويدي بكافة تفاصيل السداد والمقدم والأقساط، وموعد المعاينة.`;
+  const message = lang === 'en'
+    ? `Hello,\nI am interested in the resale unit (${referenceCode}) - ${title}\nUnit Link: ${propertyUrl}\n\nPlease share the payment details, down payment, installment plan, and schedule a viewing.`
+    : `السلام عليكم ورحمة الله،\nأنا مهتم بالوحدة ريسيل كود (${referenceCode}) - ${title}\nرابط الوحدة: ${propertyUrl}\n\nبرجاء تزويدي بكافة تفاصيل السداد والمقدم والأقساط، وموعد المعاينة.`;
 
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
 }

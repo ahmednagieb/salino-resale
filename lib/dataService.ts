@@ -4,9 +4,9 @@ import { MOCK_COMPOUNDS, MOCK_PROPERTIES, MOCK_SUBMISSIONS } from './mockData';
 import { cleanSecondaryImagesForSoldProperty } from './imageUpload';
 
 // In-memory local storage fallback for interactive client-side testing when Supabase is not connected
-let localProperties: ResaleProperty[] = [...MOCK_PROPERTIES];
-let localCompounds: Compound[] = [...MOCK_COMPOUNDS];
-let localSubmissions: SellerSubmission[] = [...MOCK_SUBMISSIONS];
+const localProperties: ResaleProperty[] = [...MOCK_PROPERTIES];
+const localCompounds: Compound[] = [...MOCK_COMPOUNDS];
+const localSubmissions: SellerSubmission[] = [...MOCK_SUBMISSIONS];
 
 /**
  * Fetch all compounds
@@ -219,7 +219,7 @@ export async function submitSellerUnit(
     }
 
     return { success: true, id: data?.id };
-  } catch (err: any) {
+  } catch {
     localSubmissions.unshift(newSubmission);
     return { success: true, id: newSubmission.id };
   }
@@ -243,7 +243,7 @@ export async function getSellerSubmissions(): Promise<SellerSubmission[]> {
       return localSubmissions;
     }
     return data as SellerSubmission[];
-  } catch (err) {
+  } catch {
     return localSubmissions;
   }
 }
@@ -312,7 +312,8 @@ export async function saveProperty(property: Partial<ResaleProperty>): Promise<R
 
   if (isSupabaseConfigured) {
     try {
-      const { compound, ...dbPayload } = prepared;
+      const dbPayload = { ...prepared };
+      delete (dbPayload as Partial<typeof prepared>).compound;
       await supabase.from('resale_properties').upsert(dbPayload);
     } catch (err) {
       console.error('Error saving property to Supabase:', err);

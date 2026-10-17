@@ -2,18 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Compound } from '@/types/database';
+import { Compound, ResaleFilterParams } from '@/types/database';
+import { useLanguage } from '@/context/LanguageContext';
 import { 
   Search, 
   SlidersHorizontal, 
   MapPin, 
   Building, 
-  Home, 
   Coins, 
   Clock, 
-  X,
-  Sparkles,
-  ArrowRight
+  X
 } from 'lucide-react';
 
 interface QuickFilterProps {
@@ -26,18 +24,11 @@ interface QuickFilterProps {
     maxTotalPrice?: string;
     deliveryStatus?: string;
   };
-  onFilterChange?: (filters: any) => void;
+  onFilterChange?: (filters: ResaleFilterParams) => void;
   isCompact?: boolean;
 }
 
 const PROPERTY_TYPES = ['الكل', 'شقة', 'دوبلكس', 'تاون هاوس', 'فيلا مستقلة', 'بنتهاوس', 'شاليه'];
-
-const CASH_PRESETS = [
-  { label: 'حتى 3 مليون', value: '3000000' },
-  { label: 'حتى 5 مليون', value: '5000000' },
-  { label: 'حتى 8 مليون', value: '8000000' },
-  { label: 'حتى 12 مليون', value: '12000000' },
-];
 
 export default function QuickFilter({
   compounds = [],
@@ -46,6 +37,7 @@ export default function QuickFilter({
   isCompact = false,
 }: QuickFilterProps) {
   const router = useRouter();
+  const { lang, t, translateType, translateDelivery, translateArea } = useLanguage();
 
   const [area, setArea] = useState(initialValues?.area || '');
   const [compoundId, setCompoundId] = useState(initialValues?.compoundId || '');
@@ -106,6 +98,13 @@ export default function QuickFilter({
     deliveryStatus
   ].filter(Boolean).length;
 
+  const cashPresets = [
+    { label: lang === 'en' ? 'Up to 3M' : 'حتى 3 مليون', value: '3000000' },
+    { label: lang === 'en' ? 'Up to 5M' : 'حتى 5 مليون', value: '5000000' },
+    { label: lang === 'en' ? 'Up to 8M' : 'حتى 8 مليون', value: '8000000' },
+    { label: lang === 'en' ? 'Up to 12M' : 'حتى 12 مليون', value: '12000000' },
+  ];
+
   return (
     <div className={`w-full ${
       isCompact 
@@ -117,7 +116,9 @@ export default function QuickFilter({
         
         {/* Top: Property Type Quick Chips */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <span className="text-xs font-bold text-slate-500 shrink-0 ml-1">نوع العقار:</span>
+          <span className="text-xs font-bold text-slate-500 shrink-0 me-1">
+            {t('filter.propertyType')}
+          </span>
           {PROPERTY_TYPES.map((type) => {
             const isSelected = (type === 'الكل' && !propertyType) || propertyType === type;
             return (
@@ -131,7 +132,7 @@ export default function QuickFilter({
                     : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                 }`}
               >
-                {type}
+                {translateType(type)}
               </button>
             );
           })}
@@ -144,7 +145,7 @@ export default function QuickFilter({
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-amber-500" />
-              <span>المنطقة في مصر</span>
+              <span>{t('filter.areaLabel')}</span>
             </label>
             <div className="relative">
               <select
@@ -155,12 +156,12 @@ export default function QuickFilter({
                 }}
                 className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-850 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer shadow-sm appearance-none"
               >
-                <option value="">كل المناطق (التجمع، زايد، المستقبل...)</option>
-                <option value="التجمع الخامس">التجمع الخامس (القاهرة الجديدة)</option>
-                <option value="الشيخ زايد">الشيخ زايد و 6 أكتوبر</option>
-                <option value="مستقبل سيتي">مدينة المستقبل (Mostakbal City)</option>
-                <option value="العاصمة الإدارية">العاصمة الإدارية الجديدة</option>
-                <option value="الساحل الشمالي">الساحل الشمالي</option>
+                <option value="">{t('filter.allAreas')}</option>
+                <option value="التجمع الخامس">{translateArea('التجمع الخامس')}</option>
+                <option value="الشيخ زايد">{translateArea('الشيخ زايد')}</option>
+                <option value="مستقبل سيتي">{translateArea('مستقبل سيتي')}</option>
+                <option value="العاصمة الإدارية">{translateArea('العاصمة الإدارية')}</option>
+                <option value="الساحل الشمالي">{translateArea('الساحل الشمالي')}</option>
               </select>
             </div>
           </div>
@@ -169,7 +170,7 @@ export default function QuickFilter({
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <Building className="w-3.5 h-3.5 text-amber-500" />
-              <span>الكمبوند</span>
+              <span>{t('filter.compoundLabel')}</span>
             </label>
             <div className="relative">
               <select
@@ -177,10 +178,10 @@ export default function QuickFilter({
                 onChange={(e) => setCompoundId(e.target.value)}
                 className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-850 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer shadow-sm appearance-none"
               >
-                <option value="">كل الكمبوندات المسجلة</option>
+                <option value="">{t('filter.allCompounds')}</option>
                 {availableCompounds.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name_ar} ({c.area_name})
+                    {lang === 'en' && c.name_en ? c.name_en : c.name_ar} ({translateArea(c.area_name)})
                   </option>
                 ))}
               </select>
@@ -191,20 +192,20 @@ export default function QuickFilter({
           <div className="space-y-1.5">
             <label className="text-xs font-black text-emerald-800 flex items-center gap-1.5">
               <Coins className="w-3.5 h-3.5 text-emerald-600" />
-              <span>الحد الأقصى للمقدم (كاش الآن)</span>
+              <span>{t('filter.maxDownPayment')}</span>
             </label>
             <select
               value={maxDownPayment}
               onChange={(e) => setMaxDownPayment(e.target.value)}
               className="w-full bg-emerald-50/80 border border-emerald-300 rounded-xl px-3.5 py-2.5 text-sm text-emerald-950 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-sm"
             >
-              <option value="">أي مبلغ كاش</option>
-              <option value="3000000">حتى 3 مليون ج.م</option>
-              <option value="5000000">حتى 5 مليون ج.م</option>
-              <option value="7500000">حتى 7.5 مليون ج.م</option>
-              <option value="10000000">حتى 10 مليون ج.م</option>
-              <option value="15000000">حتى 15 مليون ج.م</option>
-              <option value="25000000">حتى 25 مليون ج.م</option>
+              <option value="">{t('filter.anyCash')}</option>
+              <option value="3000000">{lang === 'en' ? 'Up to 3 Million EGP' : 'حتى 3 مليون ج.م'}</option>
+              <option value="5000000">{lang === 'en' ? 'Up to 5 Million EGP' : 'حتى 5 مليون ج.م'}</option>
+              <option value="7500000">{lang === 'en' ? 'Up to 7.5 Million EGP' : 'حتى 7.5 مليون ج.م'}</option>
+              <option value="10000000">{lang === 'en' ? 'Up to 10 Million EGP' : 'حتى 10 مليون ج.م'}</option>
+              <option value="15000000">{lang === 'en' ? 'Up to 15 Million EGP' : 'حتى 15 مليون ج.م'}</option>
+              <option value="25000000">{lang === 'en' ? 'Up to 25 Million EGP' : 'حتى 25 مليون ج.م'}</option>
             </select>
           </div>
 
@@ -212,19 +213,19 @@ export default function QuickFilter({
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-amber-500" />
-              <span>موعد الاستلام</span>
+              <span>{t('filter.deliveryLabel')}</span>
             </label>
             <select
               value={deliveryStatus}
               onChange={(e) => setDeliveryStatus(e.target.value)}
               className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-850 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer shadow-sm"
             >
-              <option value="">كل حالات الاستلام</option>
-              <option value="استلام فوري">استلام فوري (جاهز للسكن)</option>
-              <option value="استلام خلال 6 أشهر">استلام خلال 6 أشهر</option>
-              <option value="استلام خلال سنة">استلام خلال سنة</option>
-              <option value="استلام 2026">استلام خلال 2026</option>
-              <option value="استلام 2027">استلام خلال 2027</option>
+              <option value="">{t('filter.allDelivery')}</option>
+              <option value="استلام فوري">{translateDelivery('استلام فوري')}</option>
+              <option value="استلام خلال 6 أشهر">{translateDelivery('استلام خلال 6 أشهر')}</option>
+              <option value="استلام خلال سنة">{translateDelivery('استلام خلال سنة')}</option>
+              <option value="استلام 2026">{translateDelivery('استلام 2026')}</option>
+              <option value="استلام 2027">{translateDelivery('استلام 2027')}</option>
             </select>
           </div>
 
@@ -232,8 +233,10 @@ export default function QuickFilter({
 
         {/* Quick Budget Presets row */}
         <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-          <span className="text-slate-500 font-bold text-[11px]">مقدمات سريعة:</span>
-          {CASH_PRESETS.map((preset) => (
+          <span className="text-slate-500 font-bold text-[11px]">
+            {t('filter.quickPresets')}
+          </span>
+          {cashPresets.map((preset) => (
             <button
               key={preset.value}
               type="button"
@@ -255,19 +258,19 @@ export default function QuickFilter({
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                 <Coins className="w-3.5 h-3.5 text-slate-500" />
-                <span>الحد الأقصى للسعر الإجمالي</span>
+                <span>{t('filter.maxTotalPrice')}</span>
               </label>
               <select
                 value={maxTotalPrice}
                 onChange={(e) => setMaxTotalPrice(e.target.value)}
                 className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
               >
-                <option value="">أي سعر إجمالي</option>
-                <option value="8000000">حتى 8 مليون ج.م</option>
-                <option value="12000000">حتى 12 مليون ج.م</option>
-                <option value="18000000">حتى 18 مليون ج.م</option>
-                <option value="25000000">حتى 25 مليون ج.م</option>
-                <option value="40000000">حتى 40 مليون ج.م</option>
+                <option value="">{t('filter.anyTotalPrice')}</option>
+                <option value="8000000">{lang === 'en' ? 'Up to 8 Million EGP' : 'حتى 8 مليون ج.م'}</option>
+                <option value="12000000">{lang === 'en' ? 'Up to 12 Million EGP' : 'حتى 12 مليون ج.م'}</option>
+                <option value="18000000">{lang === 'en' ? 'Up to 18 Million EGP' : 'حتى 18 مليون ج.م'}</option>
+                <option value="25000000">{lang === 'en' ? 'Up to 25 Million EGP' : 'حتى 25 مليون ج.م'}</option>
+                <option value="40000000">{lang === 'en' ? 'Up to 40 Million EGP' : 'حتى 40 مليون ج.م'}</option>
               </select>
             </div>
           </div>
@@ -282,7 +285,7 @@ export default function QuickFilter({
             className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-amber-600 transition-colors py-1.5 px-2 rounded-xl hover:bg-slate-100 cursor-pointer"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
-            <span>{isAdvancedOpen ? 'إخفاء الفلاتر المتقدمة' : 'فلاتر متقدمة (السعر الإجمالي)'}</span>
+            <span>{isAdvancedOpen ? t('filter.hideAdvanced') : t('filter.advancedFilters')}</span>
           </button>
 
           <div className="flex items-center gap-2">
@@ -293,7 +296,7 @@ export default function QuickFilter({
                 className="text-xs font-bold text-slate-500 hover:text-rose-600 px-3 py-2 rounded-xl transition-colors flex items-center gap-1 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
-                <span>إعادة ضبط ({activeFilterCount})</span>
+                <span>{t('filter.reset')} ({activeFilterCount})</span>
               </button>
             )}
 
@@ -302,7 +305,7 @@ export default function QuickFilter({
               className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-sm px-7 py-3 rounded-xl shadow-lg shadow-amber-500/25 flex items-center gap-2 transition-all hover:scale-102 active:scale-98 cursor-pointer"
             >
               <Search className="w-4 h-4 text-slate-950" />
-              <span>بحث في صفقات الريسيل</span>
+              <span>{t('filter.searchCta')}</span>
             </button>
           </div>
 

@@ -1,9 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { Building2, MessageCircle, Phone, MapPin, ShieldCheck, Clock } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { Building2, MessageCircle, ShieldCheck, Clock } from 'lucide-react';
 
 export default function Footer() {
+  const pathname = usePathname();
+  const { t } = useLanguage();
+
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <footer className="bg-slate-950 text-slate-300 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
@@ -16,42 +26,42 @@ export default function Footer() {
                 <Building2 className="w-5 h-5 text-slate-950" />
               </div>
               <span className="text-xl font-black text-white">
-                سالينو <span className="text-amber-400">ريسيل</span>
+                {t('nav.brand')} <span className="text-amber-400">{t('nav.resale')}</span>
               </span>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed">
-              المنصة المتخصصة الأولى في مصر لصفقات إعادة البيع العقاري (الريسيل) مباشرة من الملاك في كبرى كمبوندات التجمع الخامس، زايد، ومستقبل سيتي بأفضل أوفر وأدق حسابات للأقساط.
+              {t('footer.desc')}
             </p>
             <div className="pt-2 flex items-center gap-3 text-xs text-amber-400">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>معاينة وتدقيق عقود المطورين</span>
+              <span>{t('footer.verifiedContracts')}</span>
             </div>
           </div>
 
           {/* Quick Links */}
           <div className="space-y-3">
-            <h3 className="text-white font-bold text-base border-r-2 border-amber-500 pr-2">
-              روابط سريعة
+            <h3 className="text-white font-bold text-base border-s-2 border-amber-500 ps-2">
+              {t('footer.quickLinks')}
             </h3>
             <ul className="space-y-2 text-sm text-slate-400">
               <li>
                 <Link href="/properties" className="hover:text-amber-400 transition-colors">
-                  أحدث وحدات الريسيل
+                  {t('footer.latestResale')}
                 </Link>
               </li>
               <li>
                 <Link href="/sell" className="hover:text-amber-400 transition-colors">
-                  اعرض وحدتك للبيع مجاناً
+                  {t('footer.sellFree')}
                 </Link>
               </li>
               <li>
                 <Link href="/properties?deliveryStatus=استلام+فوري" className="hover:text-amber-400 transition-colors">
-                  وحدات استلام فوري
+                  {t('footer.readyDelivery')}
                 </Link>
               </li>
               <li>
                 <Link href="/admin" className="hover:text-amber-400 transition-colors">
-                  بوابة إدارة المنصة
+                  {t('footer.adminPortal')}
                 </Link>
               </li>
             </ul>
@@ -59,28 +69,28 @@ export default function Footer() {
 
           {/* Top Resale Areas */}
           <div className="space-y-3">
-            <h3 className="text-white font-bold text-base border-r-2 border-amber-500 pr-2">
-              أشهر مناطق الريسيل
+            <h3 className="text-white font-bold text-base border-s-2 border-amber-500 ps-2">
+              {t('footer.topAreas')}
             </h3>
             <ul className="space-y-2 text-sm text-slate-400">
               <li>
                 <Link href="/properties?area=التجمع+الخامس" className="hover:text-amber-400 transition-colors">
-                  كمبوندات التجمع الخامس (القاهرة الجديدة)
+                  {t('footer.newCairo')}
                 </Link>
               </li>
               <li>
                 <Link href="/properties?area=الشيخ+زايد" className="hover:text-amber-400 transition-colors">
-                  كمبوندات الشيخ زايد و 6 أكتوبر
+                  {t('footer.sheikhZayed')}
                 </Link>
               </li>
               <li>
                 <Link href="/properties?area=مستقبل+سيتي" className="hover:text-amber-400 transition-colors">
-                  ريسيل مدينة المستقبل (Mostakbal City)
+                  {t('footer.mostakbal')}
                 </Link>
               </li>
               <li>
                 <Link href="/properties?area=الساحل+الشمالي" className="hover:text-amber-400 transition-colors">
-                  ريسيل الساحل الشمالي وسيدي عبد الرحمن
+                  {t('footer.northCoast')}
                 </Link>
               </li>
             </ul>
@@ -88,11 +98,11 @@ export default function Footer() {
 
           {/* Contact & Support */}
           <div className="space-y-4">
-            <h3 className="text-white font-bold text-base border-r-2 border-amber-500 pr-2">
-              تواصل ومساعدة المبيعات
+            <h3 className="text-white font-bold text-base border-s-2 border-amber-500 ps-2">
+              {t('footer.salesContact')}
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              فريق مستشاري الريسيل جاهز لمساعدتك في حساب متبقي الأقساط ومصاريف التنازل في الشركة.
+              {t('footer.salesDesc')}
             </p>
             <div className="space-y-2 text-sm">
               <a
@@ -102,11 +112,11 @@ export default function Footer() {
                 className="flex items-center gap-2.5 text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
-                <span>محادثة واتساب مباشرة: 01000000000</span>
+                <span>{t('footer.whatsappChat')}</span>
               </a>
               <div className="flex items-center gap-2 text-xs text-slate-400">
                 <Clock className="w-3.5 h-3.5 text-amber-500" />
-                <span>يومياً من 10:00 صباحاً حتى 10:00 مساءً</span>
+                <span>{t('footer.workHours')}</span>
               </div>
             </div>
           </div>
@@ -115,11 +125,12 @@ export default function Footer() {
 
         {/* Disclaimer & Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-slate-800/80 text-xs text-slate-400 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p>
-            جميع الحقوق محفوظة © 2025 سالينو ريسيل مصر.
-          </p>
-          <p className="text-[11px] text-slate-400 max-w-xl text-center md:text-left">
-            * تنويه: أرقام المدفوع والأوفر برايس ومصاريف التنازل يتم التحقق منها استناداً إلى عقود المطور الرسمية وكشوف الحساب الصادرة من إدارات الحسابات.
+          <div className="flex items-center gap-4">
+            <p>{t('footer.rights')}</p>
+            <LanguageSwitcher variant="footer" />
+          </div>
+          <p className="text-[11px] text-slate-400 max-w-xl text-center md:text-start">
+            {t('footer.disclaimer')}
           </p>
         </div>
       </div>

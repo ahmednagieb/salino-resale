@@ -2,39 +2,34 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getProperties, getSellerSubmissions, getCompounds } from '@/lib/dataService';
-import { formatEGP } from '@/lib/utils';
-import { ResaleProperty, SellerSubmission, Compound } from '@/types/database';
+import { getProperties, getSellerSubmissions } from '@/lib/dataService';
+import { ResaleProperty, SellerSubmission } from '@/types/database';
 import { 
   Building2, 
   Coins, 
   Inbox, 
   CheckCircle2, 
   PlusCircle, 
-  MapPin, 
   ArrowLeft, 
-  Sparkles,
-  TrendingUp,
-  Clock,
-  Layers
+  ArrowRight,
+  TrendingUp
 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function AdminDashboardOverview() {
+  const { t, isRTL, formatMoney, translateType } = useLanguage();
   const [properties, setProperties] = useState<ResaleProperty[]>([]);
   const [submissions, setSubmissions] = useState<SellerSubmission[]>([]);
-  const [compounds, setCompounds] = useState<Compound[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [p, s, c] = await Promise.all([
+      const [p, s] = await Promise.all([
         getProperties(),
         getSellerSubmissions(),
-        getCompounds(),
       ]);
       setProperties(p);
       setSubmissions(s);
-      setCompounds(c);
       setLoading(false);
     }
     load();
@@ -47,10 +42,12 @@ export default function AdminDashboardOverview() {
   const totalDownPaymentValue = properties.reduce((sum, p) => sum + (p.total_down_payment || 0), 0);
   const totalPortfolioValue = properties.reduce((sum, p) => sum + (p.total_price || 0), 0);
 
+  const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
+
   if (loading) {
     return (
       <div className="py-20 text-center text-slate-400">
-        جاري تحميل بيانات لوحة التحكم...
+        {t('admin.overview.loadingData')}
       </div>
     );
   }
@@ -62,10 +59,10 @@ export default function AdminDashboardOverview() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white">
-            مرحباً بك في لوحة تحكم سالينو ريسيل
+            {t('admin.overview.title')}
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            إحصائيات فورية للمبيعات، إدارة الإعلانات، وطلبات الملاك
+            {t('admin.overview.subtitle')}
           </p>
         </div>
 
@@ -75,7 +72,7 @@ export default function AdminDashboardOverview() {
             className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md shadow-amber-500/20 flex items-center gap-2 transition-all hover:scale-102"
           >
             <PlusCircle className="w-4 h-4 text-slate-950" />
-            <span>إضافة وحدة ريسيل جديدة</span>
+            <span>{t('admin.overview.addProperty')}</span>
           </Link>
         </div>
       </div>
@@ -86,57 +83,57 @@ export default function AdminDashboardOverview() {
         {/* 1. Active Listings */}
         <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
-            <span>الوحدات المتاحة</span>
+            <span>{t('admin.overview.available')}</span>
             <Building2 className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-3xl font-black text-white">
-            {availableCount} <span className="text-sm font-normal text-slate-400">وحدة</span>
+            {availableCount} <span className="text-sm font-normal text-slate-400">{t('admin.overview.unit')}</span>
           </div>
           <div className="text-[11px] text-emerald-400 flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>جاهزة للمعاينة والحجز</span>
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+            <span>{t('admin.overview.ready')} ({soldCount} {t('admin.overview.sold')})</span>
           </div>
         </div>
 
         {/* 2. New Seller Submissions */}
         <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
-            <span>طلبات الملاك الجديدة</span>
+            <span>{t('admin.overview.newRequests')}</span>
             <Inbox className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-3xl font-black text-amber-400">
-            {newSubmissionsCount} <span className="text-sm font-normal text-slate-400">طلب جديد</span>
+            {newSubmissionsCount} <span className="text-sm font-normal text-slate-400">{t('admin.overview.request')}</span>
           </div>
           <div className="text-[11px] text-amber-400/80">
-            بحاجة لمراجعة كشف الحساب
+            {t('admin.overview.reviewStmt')}
           </div>
         </div>
 
         {/* 3. Total Cash Down Value */}
         <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
-            <span>إجمالي المطلوب كاش بالموقع</span>
+            <span>{t('admin.overview.totalCash')}</span>
             <Coins className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-2xl font-black text-emerald-400 truncate">
-            {formatEGP(totalDownPaymentValue)}
+            {formatMoney(totalDownPaymentValue)}
           </div>
           <div className="text-[11px] text-slate-400">
-            مقدمات وأوفر برايس الوحدات
+            {t('admin.overview.downAndOver')}
           </div>
         </div>
 
         {/* 4. Total Portfolio Value */}
         <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
-            <span>القيمة الإجمالية للمحفظة</span>
+            <span>{t('admin.overview.totalPortfolio')}</span>
             <TrendingUp className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-2xl font-black text-white truncate">
-            {formatEGP(totalPortfolioValue)}
+            {formatMoney(totalPortfolioValue)}
           </div>
           <div className="text-[11px] text-slate-400">
-            شامل المتبقي أقساط للمطورين
+            {t('admin.overview.devInstallments')}
           </div>
         </div>
 
@@ -151,15 +148,15 @@ export default function AdminDashboardOverview() {
             <div className="flex items-center gap-2">
               <Inbox className="w-5 h-5 text-amber-400" />
               <h2 className="text-lg font-black text-white">
-                أحدث طلبات الملاك لعرض الوحدات
+                {t('admin.overview.recentSubmissions')}
               </h2>
             </div>
             <Link
               href="/admin/submissions"
               className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1"
             >
-              <span>عرض الصندوق</span>
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>{t('admin.overview.viewAll')}</span>
+              <ArrowIcon className="w-3.5 h-3.5" />
             </Link>
           </div>
 
@@ -179,14 +176,14 @@ export default function AdminDashboardOverview() {
                         ? 'bg-blue-500/20 text-blue-400'
                         : 'bg-emerald-500/20 text-emerald-400'
                     }`}>
-                      {sub.status === 'new' ? 'جديد' : sub.status === 'contacted' ? 'تم التواصل' : 'معروض'}
+                      {sub.status === 'new' ? t('admin.subs.tabNew') : sub.status === 'contacted' ? t('admin.subs.tabContacted') : t('admin.subs.tabListed')}
                     </span>
                   </div>
                   <div className="text-xs text-slate-400">
-                    {sub.property_type} في {sub.compound_name} • {sub.area_sqm} م²
+                    {translateType(sub.property_type)} {isRTL ? `في ${sub.compound_name}` : `in ${sub.compound_name}`} • {sub.area_sqm} m²
                   </div>
                   <div className="text-xs text-emerald-400 font-medium">
-                    المدفوع: {formatEGP(sub.paid_amount)} | الأوفر المطلوب: {formatEGP(sub.over_price)}
+                    {t('admin.subs.paidToDev')} {formatMoney(sub.paid_amount)} | {t('admin.subs.overReq')} {formatMoney(sub.over_price)}
                   </div>
                 </div>
 
@@ -194,7 +191,7 @@ export default function AdminDashboardOverview() {
                   href="/admin/submissions"
                   className="shrink-0 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-2 rounded-xl transition-colors"
                 >
-                  فحص الطلب
+                  {t('admin.overview.contact')}
                 </Link>
               </div>
             ))}
@@ -207,15 +204,15 @@ export default function AdminDashboardOverview() {
             <div className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-amber-400" />
               <h2 className="text-lg font-black text-white">
-                أحدث الوحدات المدرجة في المنصة
+                {t('admin.overview.recentProperties')}
               </h2>
             </div>
             <Link
               href="/admin/properties"
               className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1"
             >
-              <span>إدارة العقارات</span>
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>{t('admin.overview.viewAll')}</span>
+              <ArrowIcon className="w-3.5 h-3.5" />
             </Link>
           </div>
 
@@ -239,7 +236,7 @@ export default function AdminDashboardOverview() {
                       <span className="text-xs font-bold text-white truncate max-w-[200px]">{prop.title_ar}</span>
                     </div>
                     <div className="text-[11px] text-slate-400">
-                      كاش الآن: <strong className="text-emerald-400">{formatEGP(prop.total_down_payment)}</strong>
+                      {t('admin.overview.cashNow')} <strong className="text-emerald-400">{formatMoney(prop.total_down_payment)}</strong>
                     </div>
                   </div>
                 </div>
@@ -249,7 +246,7 @@ export default function AdminDashboardOverview() {
                   target="_blank"
                   className="shrink-0 text-slate-400 hover:text-white text-xs py-1.5 px-2.5 rounded-lg border border-slate-800 hover:border-slate-700"
                 >
-                  معاينة
+                  {t('admin.props.viewUnit')}
                 </Link>
               </div>
             ))}

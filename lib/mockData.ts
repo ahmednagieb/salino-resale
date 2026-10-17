@@ -319,11 +319,55 @@ export const MOCK_SUBMISSIONS: SellerSubmission[] = [
   },
 ];
 
-export const POPULAR_AREAS = [
-  { name: 'التجمع الخامس', count: 18, image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80' },
-  { name: 'الشيخ زايد', count: 14, image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80' },
-  { name: 'مستقبل سيتي', count: 9, image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80' },
-  { name: '6 أكتوبر', count: 11, image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=600&q=80' },
-  { name: 'العاصمة الإدارية', count: 8, image: 'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?auto=format&fit=crop&w=600&q=80' },
-  { name: 'الساحل الشمالي', count: 6, image: 'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=600&q=80' },
+export interface PopularArea {
+  name: string;
+  count: number;
+  image: string;
+  description: string;
+  description_en: string;
+}
+
+export const POPULAR_AREAS: PopularArea[] = [
+  {
+    name: 'التجمع الخامس',
+    count: 18,
+    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80',
+    description: 'أرقى كمبوندات القاهرة الجديدة واستلام فوري',
+    description_en: 'Prime New Cairo compounds & ready delivery',
+  },
+  {
+    name: 'الشيخ زايد',
+    count: 14,
+    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80',
+    description: 'مجتمعات سكنية راقية متكاملة الخدمات بغرب القاهرة',
+    description_en: 'Upscale communities with full amenities in West Cairo',
+  },
+  {
+    name: 'مستقبل سيتي',
+    count: 9,
+    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80',
+    description: 'المدينة الخضراء الذكية الأسرع نمواً بالقرب من العاصمة',
+    description_en: 'Smart green city close to the New Capital',
+  },
+  {
+    name: '6 أكتوبر',
+    count: 11,
+    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=600&q=80',
+    description: 'تنوع كبير في الفلل والشقق بأفضل خطط سداد',
+    description_en: 'Diverse villas and apartments with top payment plans',
+  },
+  {
+    name: 'العاصمة الإدارية',
+    count: 8,
+    image: 'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?auto=format&fit=crop&w=600&q=80',
+    description: 'مستقبل الاستثمار العقاري في الأحياء السكنية الراقية',
+    description_en: 'Future real estate investment hub in prime districts',
+  },
+  {
+    name: 'الساحل الشمالي',
+    count: 6,
+    image: 'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=600&q=80',
+    description: 'شاليهات وفلل ريسيل على أرقى شواطئ البحر المتوسط',
+    description_en: 'Resale chalets and villas on the Mediterranean coast',
+  },
 ];
