@@ -11,7 +11,8 @@ import {
   Building, 
   Coins, 
   Clock, 
-  X
+  X,
+  ChevronDown
 } from 'lucide-react';
 
 interface QuickFilterProps {
@@ -106,7 +107,7 @@ export default function QuickFilter({
   ];
 
   return (
-    <div className={`w-full ${
+    <div className={`w-full text-slate-900 ${
       isCompact 
         ? 'bg-white p-5 rounded-3xl border border-slate-200/90 shadow-sm' 
         : 'glass-panel p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/70'
@@ -154,15 +155,18 @@ export default function QuickFilter({
                   setArea(e.target.value);
                   setCompoundId('');
                 }}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-850 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer shadow-sm appearance-none"
+                className="w-full bg-white border border-slate-300 rounded-xl ps-3.5 pe-9 py-2.5 text-sm text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 cursor-pointer shadow-sm appearance-none"
               >
-                <option value="">{t('filter.allAreas')}</option>
-                <option value="التجمع الخامس">{translateArea('التجمع الخامس')}</option>
-                <option value="الشيخ زايد">{translateArea('الشيخ زايد')}</option>
-                <option value="مستقبل سيتي">{translateArea('مستقبل سيتي')}</option>
-                <option value="العاصمة الإدارية">{translateArea('العاصمة الإدارية')}</option>
-                <option value="الساحل الشمالي">{translateArea('الساحل الشمالي')}</option>
+                <option value="" className="text-slate-900 bg-white">{t('filter.allAreas')}</option>
+                <option value="التجمع الخامس" className="text-slate-900 bg-white">{translateArea('التجمع الخامس')}</option>
+                <option value="الشيخ زايد" className="text-slate-900 bg-white">{translateArea('الشيخ زايد')}</option>
+                <option value="مستقبل سيتي" className="text-slate-900 bg-white">{translateArea('مستقبل سيتي')}</option>
+                <option value="العاصمة الإدارية" className="text-slate-900 bg-white">{translateArea('العاصمة الإدارية')}</option>
+                <option value="الساحل الشمالي" className="text-slate-900 bg-white">{translateArea('الساحل الشمالي')}</option>
               </select>
+              <div className="absolute top-1/2 -translate-y-1/2 end-3 pointer-events-none text-slate-500">
+                <ChevronDown className="w-4 h-4" />
+              </div>
             </div>
           </div>
 
@@ -176,15 +180,18 @@ export default function QuickFilter({
               <select
                 value={compoundId}
                 onChange={(e) => setCompoundId(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-850 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer shadow-sm appearance-none"
+                className="w-full bg-white border border-slate-300 rounded-xl ps-3.5 pe-9 py-2.5 text-sm text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 cursor-pointer shadow-sm appearance-none"
               >
-                <option value="">{t('filter.allCompounds')}</option>
+                <option value="" className="text-slate-900 bg-white">{t('filter.allCompounds')}</option>
                 {availableCompounds.map((c) => (
-                  <option key={c.id} value={c.id}>
+                  <option key={c.id} value={c.id} className="text-slate-900 bg-white">
                     {lang === 'en' && c.name_en ? c.name_en : c.name_ar} ({translateArea(c.area_name)})
                   </option>
                 ))}
               </select>
+              <div className="absolute top-1/2 -translate-y-1/2 end-3 pointer-events-none text-slate-500">
+                <ChevronDown className="w-4 h-4" />
+              </div>
             </div>
           </div>
 
@@ -194,19 +201,24 @@ export default function QuickFilter({
               <Coins className="w-3.5 h-3.5 text-emerald-600" />
               <span>{t('filter.maxDownPayment')}</span>
             </label>
-            <select
-              value={maxDownPayment}
-              onChange={(e) => setMaxDownPayment(e.target.value)}
-              className="w-full bg-emerald-50/80 border border-emerald-300 rounded-xl px-3.5 py-2.5 text-sm text-emerald-950 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-sm"
-            >
-              <option value="">{t('filter.anyCash')}</option>
-              <option value="3000000">{lang === 'en' ? 'Up to 3 Million EGP' : 'حتى 3 مليون ج.م'}</option>
-              <option value="5000000">{lang === 'en' ? 'Up to 5 Million EGP' : 'حتى 5 مليون ج.م'}</option>
-              <option value="7500000">{lang === 'en' ? 'Up to 7.5 Million EGP' : 'حتى 7.5 مليون ج.م'}</option>
-              <option value="10000000">{lang === 'en' ? 'Up to 10 Million EGP' : 'حتى 10 مليون ج.م'}</option>
-              <option value="15000000">{lang === 'en' ? 'Up to 15 Million EGP' : 'حتى 15 مليون ج.م'}</option>
-              <option value="25000000">{lang === 'en' ? 'Up to 25 Million EGP' : 'حتى 25 مليون ج.م'}</option>
-            </select>
+            <div className="relative">
+              <select
+                value={maxDownPayment}
+                onChange={(e) => setMaxDownPayment(e.target.value)}
+                className="w-full bg-emerald-50/90 border border-emerald-300 rounded-xl ps-3.5 pe-9 py-2.5 text-sm text-emerald-950 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-sm appearance-none"
+              >
+                <option value="" className="text-slate-900 bg-white">{t('filter.anyCash')}</option>
+                <option value="3000000" className="text-slate-900 bg-white">{lang === 'en' ? 'Up to 3 Million EGP' : 'حتى 3 مليون ج.م'}</option>
+                <option value="5000000" className="text-slate-900 bg-white">{lang === 'en' ? 'Up to 5 Million EGP' : 'حتى 5 مليون ج.م'}</option>
+                <option value="7500000" className="text-slate-900 bg-white">{lang === 'en' ? 'Up to 7.5 Million EGP' : 'حتى 7.5 مليون ج.م'}</option>
+                <option value="10000000" className="text-slate-900 bg-white">{lang === 'en' ? 'Up to 10 Million EGP' : 'حتى 10 مليون ج.م'}</option>
+                <option value="15000000" className="text-slate-900 bg-white">{lang === 'en' ? 'Up to 15 Million EGP' : 'حتى 15 مليون ج.م'}</option>
+                <option value="25000000" className="text-slate-900 bg-white">{lang === 'en' ? 'Up to 25 Million EGP' : 'حتى 25 مليون ج.م'}</option>
+              </select>
+              <div className="absolute top-1/2 -translate-y-1/2 end-3 pointer-events-none text-emerald-700">
+                <ChevronDown className="w-4 h-4" />
+              </div>
+            </div>
           </div>
 
           {/* 4. Delivery Status */}
@@ -215,18 +227,23 @@ export default function QuickFilter({
               <Clock className="w-3.5 h-3.5 text-amber-500" />
               <span>{t('filter.deliveryLabel')}</span>
             </label>
-            <select
-              value={deliveryStatus}
-              onChange={(e) => setDeliveryStatus(e.target.value)}
-              className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-850 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer shadow-sm"
-            >
-              <option value="">{t('filter.allDelivery')}</option>
-              <option value="استلام فوري">{translateDelivery('استلام فوري')}</option>
-              <option value="استلام خلال 6 أشهر">{translateDelivery('استلام خلال 6 أشهر')}</option>
-              <option value="استلام خلال سنة">{translateDelivery('استلام خلال سنة')}</option>
-              <option value="استلام 2026">{translateDelivery('استلام 2026')}</option>
-              <option value="استلام 2027">{translateDelivery('استلام 2027')}</option>
-            </select>
+            <div className="relative">
+              <select
+                value={deliveryStatus}
+                onChange={(e) => setDeliveryStatus(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl ps-3.5 pe-9 py-2.5 text-sm text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer shadow-sm appearance-none"
+              >
+                <option value="" className="text-slate-900 bg-white">{t('filter.allDelivery')}</option>
+                <option value="استلام فوري" className="text-slate-900 bg-white">{translateDelivery('استلام فوري')}</option>
+                <option value="استلام خلال 6 أشهر" className="text-slate-900 bg-white">{translateDelivery('استلام خلال 6 أشهر')}</option>
+                <option value="استلام خلال سنة" className="text-slate-900 bg-white">{translateDelivery('استلام خلال سنة')}</option>
+                <option value="استلام 2026" className="text-slate-900 bg-white">{translateDelivery('استلام 2026')}</option>
+                <option value="استلام 2027" className="text-slate-900 bg-white">{translateDelivery('استلام 2027')}</option>
+              </select>
+              <div className="absolute top-1/2 -translate-y-1/2 end-3 pointer-events-none text-slate-500">
+                <ChevronDown className="w-4 h-4" />
+              </div>
+            </div>
           </div>
 
         </div>
@@ -260,18 +277,23 @@ export default function QuickFilter({
                 <Coins className="w-3.5 h-3.5 text-slate-500" />
                 <span>{t('filter.maxTotalPrice')}</span>
               </label>
-              <select
-                value={maxTotalPrice}
-                onChange={(e) => setMaxTotalPrice(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
-              >
-                <option value="">{t('filter.anyTotalPrice')}</option>
-                <option value="8000000">{lang === 'en' ? 'Up to 8 Million EGP' : 'حتى 8 مليون ج.م'}</option>
-                <option value="12000000">{lang === 'en' ? 'Up to 12 Million EGP' : 'حتى 12 مليون ج.م'}</option>
-                <option value="18000000">{lang === 'en' ? 'Up to 18 Million EGP' : 'حتى 18 مليون ج.م'}</option>
-                <option value="25000000">{lang === 'en' ? 'Up to 25 Million EGP' : 'حتى 25 مليون ج.م'}</option>
-                <option value="40000000">{lang === 'en' ? 'Up to 40 Million EGP' : 'حتى 40 مليون ج.م'}</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={maxTotalPrice}
+                  onChange={(e) => setMaxTotalPrice(e.target.value)}
+                  className="w-full bg-white border border-slate-300 rounded-xl ps-3.5 pe-9 py-2.5 text-sm text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 appearance-none shadow-sm cursor-pointer"
+                >
+                  <option value="" className="text-slate-900 bg-white">{t('filter.anyTotalPrice')}</option>
+                  <option value="8000000" className="text-slate-900 bg-white">{lang === 'en' ? 'Up to 8 Million EGP' : 'حتى 8 مليون ج.م'}</option>
+                  <option value="12000000" className="text-slate-900 bg-white">{lang === 'en' ? 'Up to 12 Million EGP' : 'حتى 12 مليون ج.م'}</option>
+                  <option value="18000000" className="text-slate-900 bg-white">{lang === 'en' ? 'Up to 18 Million EGP' : 'حتى 18 مليون ج.م'}</option>
+                  <option value="25000000" className="text-slate-900 bg-white">{lang === 'en' ? 'Up to 25 Million EGP' : 'حتى 25 مليون ج.م'}</option>
+                  <option value="40000000" className="text-slate-900 bg-white">{lang === 'en' ? 'Up to 40 Million EGP' : 'حتى 40 مليون ج.م'}</option>
+                </select>
+                <div className="absolute top-1/2 -translate-y-1/2 end-3 pointer-events-none text-slate-500">
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+              </div>
             </div>
           </div>
         )}
