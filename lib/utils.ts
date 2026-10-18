@@ -37,8 +37,8 @@ export function generateWhatsAppLink(
   const phone = customPhone || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '201000000000';
   const cleanPhone = phone.replace(/[^0-9]/g, '');
   
-  // Construct site URL or placeholder
-  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://salino-resale.com';
+  // Use consistent site URL across SSR and client to prevent hydration mismatch
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://salino-resale.com';
   const propertyUrl = `${siteUrl}/properties/${propertyId}`;
 
   const message = lang === 'en'

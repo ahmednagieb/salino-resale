@@ -41,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" className={`${cairo.variable} h-full`}>
+    <html lang="ar" dir="rtl" suppressHydrationWarning className={`${cairo.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans antialiased selection:bg-amber-500 selection:text-white">
         <LanguageProvider>
           <Navbar />

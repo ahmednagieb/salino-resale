@@ -319,6 +319,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
+            suppressHydrationWarning
             className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/20 transition-all hover:scale-102 active:scale-98"
           >
             <MessageCircle className="w-3.5 h-3.5 fill-white text-emerald-600" />
