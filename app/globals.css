@@ -78,10 +78,12 @@ html[dir="ltr"] body {
 
 /* Gold Gradient Text */
 .text-gold-gradient {
-  background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #b45309 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #d97706 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  color: #f59e0b;
+  display: inline-block;
 }
 
 .emerald-gradient {

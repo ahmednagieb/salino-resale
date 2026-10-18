@@ -52,8 +52,9 @@ export default function HomePageClient({
               <span>{t('hero.badge')}</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.18] text-white">
-              {t('hero.titlePart1')} <span className="text-gold-gradient">{t('hero.titleHighlight')}</span>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.3] text-white">
+              <span className="block">{t('hero.titlePart1')}</span>
+              <span className="block text-gold-gradient mt-2 sm:mt-3 pb-1">{t('hero.titleHighlight')}</span>
             </h1>
 
             <p className="text-base sm:text-lg text-slate-300 font-medium leading-relaxed max-w-2xl mx-auto">

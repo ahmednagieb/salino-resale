@@ -22,8 +22,8 @@ export const translations = {
 
     // Hero
     'hero.badge': 'المنصة الأولى المتخصصة في صفقات الريسيل العقاري بمصر',
-    'hero.titlePart1': 'اشتري وحدتك ريسيل بأفضل',
-    'hero.titleHighlight': 'أوفر ومقدم كاش',
+    'hero.titlePart1': 'اشتري وحدتك ريسيل',
+    'hero.titleHighlight': 'بأفضل أوفر ومقدم كاش',
     'hero.description': 'تصفح مئات صفقات الريسيل الحصرية مباشرة من الملاك في أرقى كمبوندات التجمع الخامس، زايد، ومستقبل سيتي مع مراجعة مالية شاملة للمقدم والأقساط.',
     'hero.pillImmediate': 'استلامات فورية وخلال سنة',
     'hero.pillDiscount': 'وفر حتى 35% عن أسعار الطرح الجديد',
@@ -429,8 +429,8 @@ export const translations = {
 
     // Hero
     'hero.badge': 'Egypt\'s #1 Specialized Resale Real Estate Platform',
-    'hero.titlePart1': 'Buy Resale Units with the Best',
-    'hero.titleHighlight': 'Over-Price & Cash Down Payment',
+    'hero.titlePart1': 'Buy Your Resale Unit',
+    'hero.titleHighlight': 'At the Best Over-Price & Cash Down',
     'hero.description': 'Browse hundreds of exclusive resale deals directly from owners across New Cairo, Sheikh Zayed, and Mostakbal City with verified cash down payments and developer installments.',
     'hero.pillImmediate': 'Ready to Move & Within 1 Year',
     'hero.pillDiscount': 'Save up to 35% vs Current Primary Launches',
