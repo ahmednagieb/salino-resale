@@ -45,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning className={`${readexPro.variable} ${montserrat.variable} h-full`}>
+    <html lang="ar" dir="rtl" suppressHydrationWarning data-scroll-behavior="smooth" className={`${readexPro.variable} ${montserrat.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-salino-obsidian text-salino-alabaster font-ar antialiased selection:bg-salino-copper selection:text-salino-alabaster">
         <LanguageProvider>
           <Navbar />
