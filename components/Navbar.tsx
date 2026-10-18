@@ -19,7 +19,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const { lang, t } = useLanguage();
 
-  if (pathname?.startsWith('/admin')) {
+  if (pathname?.startsWith('/admin') || pathname === '/') {
     return null;
   }
 

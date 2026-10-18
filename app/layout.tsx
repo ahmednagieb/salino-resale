@@ -1,32 +1,36 @@
 import type { Metadata } from 'next';
-import { Cairo } from 'next/font/google';
+import { Readex_Pro, Montserrat } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { LanguageProvider } from '@/context/LanguageContext';
 
-const cairo = Cairo({
+const readexPro = Readex_Pro({
   subsets: ['arabic', 'latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-cairo',
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-readex',
+  display: 'swap',
+});
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-montserrat',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'سالينو ريسيل | المنصة الأولى لعقارات الريسيل في مصر | Salino Resale Egypt',
-  description: 'أفضل صفقات ووحدات إعادة البيع (ريسيل) في التجمع الخامس، زايد، مستقبل سيتي، والعاصمة الإدارية. حسابات دقيقة للمطلوب كاش، الأوفر برايس، ومتبقي الأقساط. Egypt #1 Resale Real Estate Marketplace.',
+  title: 'سالينو لإدارة المشروعات | Salino Project Management',
+  description: 'إدارة متكاملة لمنظومة الأعمال في مصر: النقل الداخلي والحلول اللوجستية، التوريدات العمومية للمشروعات، والتسويق والاستشارات العقارية. Integrated Management for Transport, Supplies & Real Estate.',
   keywords: [
-    'ريسيل مصر',
-    'شقق ريسيل التجمع الخامس',
-    'ريسيل مستقبل سيتي',
-    'ريسيل الشيخ زايد',
-    'أوفر برايس',
-    'ماونتن فيو ريسيل',
-    'بالم هيلز ريسيل',
-    'ميفيدا ريسيل',
-    'Egypt Resale Properties',
-    'New Cairo Resale',
-    'Sheikh Zayed Resale',
+    'سالينو لإدارة المشروعات',
+    'Salino Project Management',
+    'نقل داخلي مصر',
+    'لوجستيات ونقل ثقيل',
+    'توريدات عمومية للمشاريع',
+    'توريد مواد بناء وحديد وأسمنت',
+    'تسويق عقاري واستشارات',
+    'عقارات العاصمة الإدارية والتجمع',
   ],
   icons: {
     icon: '/logo.svg',
@@ -41,8 +45,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning className={`${cairo.variable} h-full`}>
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans antialiased selection:bg-amber-500 selection:text-white">
+    <html lang="ar" dir="rtl" suppressHydrationWarning className={`${readexPro.variable} ${montserrat.variable} h-full`}>
+      <body className="min-h-full flex flex-col bg-salino-obsidian text-salino-alabaster font-ar antialiased selection:bg-salino-copper selection:text-salino-alabaster">
         <LanguageProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
